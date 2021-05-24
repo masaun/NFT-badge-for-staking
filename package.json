@@ -1,0 +1,27 @@
+{
+  "name": "0xHack-chainlink-on-polygon",
+  "version": "1.0.0",
+  "description": "",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "truffle test ./test/test-local/* --network local",
+    "test:Something": "truffle test ./test/test-local/Something.test.js --network local",
+    "script:Something": "truffle exec ./scripts/polygon-matic/Something.script.js --network polygon_testnet",
+    "compile:local": "truffle compile --reset --network local",
+    "migrate:local": "truffle migrate --reset --network local",
+    "compile:polygon_testnet": "truffle compile --reset --network polygon_testnet",
+    "migrate:polygon_testnet": "truffle migrate --reset --network polygon_testnet"
+  },
+  "author": "masaun",
+  "license": "MIT",
+  "dependencies": {
+    "@openzeppelin/contracts": "^3.4.1",
+    "@openzeppelin/test-helpers": "^0.5.10",
+    "@truffle/hdwallet-provider": "^1.2.0",
+    "dotenv": "^8.2.0",
+    "eth-block-tracker": "^4.4.3"
+  },
+  "devDependencies": {}
+}
