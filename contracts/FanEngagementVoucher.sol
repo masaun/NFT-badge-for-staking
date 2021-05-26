@@ -13,10 +13,18 @@ contract FanEngagementVoucher {
 
     function mintVoucherForFan() public returns (bool) {
         // [Todo]: Check whether receiver is a fan (for home team) or not
-        address[] memory _fans = fanRegister.getFans();
+        address[] memory _fans = _getFans();
 
         // [Todo]: Retrieve a result of game via Chainlink
 
+    }
+
+
+    //------------------
+    // Private methods
+    //------------------
+    function _getFans() private view returns (address[] memory _fans) {
+        return fanRegister.getFans();
     }
     
 
