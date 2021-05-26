@@ -12,7 +12,6 @@ import "./interfaces/IERC721TokenReceiver.sol";
 import "./interfaces/IERC1155ERC721.sol";
 import "./interfaces/IVoucherKernel.sol";
 import "./interfaces/ICashier.sol";
-import "./interfaces/ILocalOracle.sol";
 
 //preparing for ERC-1066, ERC-1444, EIP-838
 
@@ -28,12 +27,10 @@ contract ERC1155ERC721 is IERC1155, IERC721, IERC1155ERC721 {
     address public owner; //contract owner
     address public voucherKernelAddress; //address of the VoucherKernel contract
     address public cashierAddress; //address of the Cashier contract
-    address public localOracleAddress; // address of the localOracle contract
 
     //standard reqs
     //ERC-1155
-    mapping(uint256 => mapping(address => uint256)) public balances; //balance of token ids of an account
-    mapping(uint256 => address) private owners1155;
+    mapping(uint256 => mapping(address => uint256)) private balances; //balance of token ids of an account
 
     //ERC-721
     mapping(address => uint256) private balance721;
@@ -53,7 +50,6 @@ contract ERC1155ERC721 is IERC1155, IERC721, IERC1155ERC721 {
 
     event LogVoucherKernelSet(address _newVoucherKernel, address _triggeredBy);
     event LogCashierSet(address _newCashier, address _triggeredBy);
-    event LogLocalOracleSet(address _newLocalOracle, address _triggeredBy);
 
     modifier onlyOwner() {
         require(msg.sender == owner, "UNAUTHORIZED_O"); //hex"10" FISSION.code(FISSION.Category.Permission, FISSION.Status.Disallowed_Stop)
@@ -66,14 +62,6 @@ contract ERC1155ERC721 is IERC1155, IERC721, IERC1155ERC721 {
             "UNSPECIFIED_VOUCHERKERNEL"
         ); //hex"20" FISSION.code(FISSION.Category.Find, FISSION.Status.NotFound_Unequal_OutOfRange)
         require(msg.sender == voucherKernelAddress, "UNAUTHORIZED_VK"); //hex"10" FISSION.code(FISSION.Category.Permission, FISSION.Status.Disallowed_Stop)
-        _;
-    }
-
-    modifier onlyFromVoucherKernelOrLocalOracle() {
-        require(
-            ((msg.sender == voucherKernelAddress) && (voucherKernelAddress != address(0)))
-             || ((msg.sender == localOracleAddress) && (localOracleAddress != address(0)))
-             , "UNAUTHORIZED_VK"); //hex"10" FISSION.code(FISSION.Category.Permission, FISSION.Status.Disallowed_Stop)
         _;
     }
 
@@ -440,13 +428,8 @@ contract ERC1155ERC721 is IERC1155, IERC721, IERC1155ERC721 {
      * @return address currently marked as the owner of the given token ID
      */
     function ownerOf(uint256 _tokenId) public view override returns (address) {
-        // Try the ERC1155 first...
-        address tokenOwner = owners1155[_tokenId];
-        if (tokenOwner == address(0)) {
-            // The ID is not the one from an ERC1155, try the ERC721s
-            tokenOwner = owners721[_tokenId];
-            require(tokenOwner != address(0), "UNDEFINED_OWNER"); //hex"20" FISSION.code(FISSION.Category.Find, FISSION.Status.NotFound_Unequal_OutOfRange)
-        }
+        address tokenOwner = owners721[_tokenId];
+        require(tokenOwner != address(0), "UNDEFINED_OWNER"); //hex"20" FISSION.code(FISSION.Category.Find, FISSION.Status.NotFound_Unequal_OutOfRange)
 
         return tokenOwner;
     }
@@ -543,17 +526,7 @@ contract ERC1155ERC721 is IERC1155, IERC721, IERC1155ERC721 {
         uint256 _tokenId,
         uint256 _value,
         bytes memory _data
-    ) public override onlyFromVoucherKernelOrLocalOracle {
-        _mint(_to, _tokenId, _value, _data);
-    }
-
-
-    function tmint(
-        address _to,
-        uint256 _tokenId,
-        uint256 _value,
-        bytes memory _data
-    ) external {
+    ) public override onlyFromVoucherKernel {
         _mint(_to, _tokenId, _value, _data);
     }
 
@@ -574,8 +547,6 @@ contract ERC1155ERC721 is IERC1155, IERC721, IERC1155ERC721 {
         require(_to != address(0), "UNSPECIFIED_ADDRESS"); //FISSION.code(FISSION.Category.Find, FISSION.Status.NotFound_Unequal_OutOfRange)
 
         balances[_tokenId][_to] = balances[_tokenId][_to].add(_value);
-        owners1155[_tokenId] = _to;
-
         emit TransferSingle(msg.sender, address(0), _to, _tokenId, _value);
 
         _doSafeTransferAcceptanceCheck(
@@ -691,15 +662,7 @@ contract ERC1155ERC721 is IERC1155, IERC721, IERC1155ERC721 {
         address _account,
         uint256 _tokenId,
         uint256 _value
-    ) public override onlyFromVoucherKernelOrLocalOracle {
-        _burn(_account, _tokenId, _value);
-    }
-
-    function tburn(
-        address _account,
-        uint256 _tokenId,
-        uint256 _value
-    ) external {
+    ) public override onlyFromVoucherKernel {
         _burn(_account, _tokenId, _value);
     }
 
@@ -718,9 +681,6 @@ contract ERC1155ERC721 is IERC1155, IERC721, IERC1155ERC721 {
         require(_account != address(0), "UNSPECIFIED_ADDRESS"); //"UNSPECIFIED_ADDRESS" FISSION.code(FISSION.Category.Find, FISSION.Status.NotFound_Unequal_OutOfRange)
 
         balances[_tokenId][_account] = balances[_tokenId][_account].sub(_value);
-
-        ILocalOracle(localOracleAddress).helpMe(balances[_tokenId][_account], _account, _tokenId);
-
         emit TransferSingle(msg.sender, _account, address(0), _tokenId, _value);
     }
 
@@ -871,20 +831,6 @@ contract ERC1155ERC721 is IERC1155, IERC721, IERC1155ERC721 {
     {
         cashierAddress = _cashierAddress;
         emit LogCashierSet(_cashierAddress, msg.sender);
-    }
-
-
-    /**
-     * @notice Set the address of the localOracleAddress contract
-     * @param _localOracleAddress   The localOracle contract
-     */
-    function setLocalOracleAddress(address _localOracleAddress)
-        external
-        onlyOwner
-        notZeroAddress(_localOracleAddress)
-    {
-        localOracleAddress = _localOracleAddress;
-        emit LogLocalOracleSet(_localOracleAddress, msg.sender);
     }
 
     /**

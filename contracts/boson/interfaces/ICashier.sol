@@ -3,6 +3,41 @@
 pragma solidity 0.7.1;
 
 interface ICashier {
+    /**
+     * @notice Pause the Cashier && the Voucher Kernel contracts in case of emergency.
+     * All functions related to creating new batch, requestVoucher or withdraw will be paused, hence cannot be executed.
+     * There is special function for withdrawing funds if contract is paused.
+     */
+    function pause() external;
+
+    /**
+     * @notice Unpause the Cashier && the Voucher Kernel contracts.
+     * All functions related to creating new batch, requestVoucher or withdraw will be unpaused.
+     */
+    function unpause() external;
+
+    function canUnpause() external view returns (bool);
+
+    /**
+     * @notice Trigger withdrawals of what funds are releasable
+     * The caller of this function triggers transfers to all involved entities (pool, issuer, token holder), also paying for gas.
+     * @dev This function would be optimized a lot, here verbose for readability.
+     * @param _tokenIdVoucher  ID of a voucher token (ERC-721) to try withdraw funds from
+     */
+    function withdraw(uint256 _tokenIdVoucher) external;
+
+    /**
+     * @notice External function for withdrawing deposits. Caller must be the seller of the goods, otherwise reverts.
+     * @notice Seller triggers withdrawals of remaining deposits for a given supply, in case the voucher set is no longer in exchange.
+     * @param _tokenIdSupply an ID of a supply token (ERC-1155) which will be burned and deposits will be returned for
+     * @param _burnedQty burned quantity that the deposits should be withdrawn for
+     * @param _msgSender owner of the voucher set
+     */
+    function withdrawDepositsSe(
+        uint256 _tokenIdSupply,
+        uint256 _burnedQty,
+        address payable _msgSender
+    ) external;
 
     /**
      * @notice Get the amount in escrow of an address

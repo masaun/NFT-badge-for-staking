@@ -4,6 +4,7 @@ pragma solidity 0.7.1;
 
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/Pausable.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./interfaces/IERC1155.sol";
 import "./interfaces/IERC165.sol";
@@ -24,7 +25,7 @@ import "./UsingHelpers.sol";
  *      See: https://ethereum.stackexchange.com/questions/5924/how-do-ethereum-mining-nodes-maintain-a-time-consistent-with-the-network/5931#5931
  */
 // solhint-disable-next-line
-contract VoucherKernel is IVoucherKernel, Ownable, UsingHelpers {
+contract VoucherKernel is IVoucherKernel, Ownable, Pausable, UsingHelpers {
     using Address for address;
     using SafeMath for uint256;
 
@@ -118,11 +119,36 @@ contract VoucherKernel is IVoucherKernel, Ownable, UsingHelpers {
         bytes32 _promiseId
     );
 
+    event LogVoucherRefunded(uint256 _tokenIdVoucher);
+
+    event LogVoucherComplain(uint256 _tokenIdVoucher);
+
+    event LogVoucherFaultCancel(uint256 _tokenIdVoucher);
+
+    event LogExpirationTriggered(uint256 _tokenIdVoucher, address _triggeredBy);
+
+    event LogFinalizeVoucher(uint256 _tokenIdVoucher, address _triggeredBy);
 
     event LogBosonRouterSet(address _newBosonRouter, address _triggeredBy);
 
     event LogCashierSet(address _newCashier, address _triggeredBy);
 
+    event LogComplainPeriodChanged(
+        uint256 _newComplainPeriod,
+        address _triggeredBy
+    );
+
+    event LogCancelFaultPeriodChanged(
+        uint256 _newCancelFaultPeriod,
+        address _triggeredBy
+    );
+
+    event LogVoucherSetFaultCancel(uint256 _tokenIdSupply, address _issuer);
+
+    event LogFundsReleased(
+        uint256 _tokenIdVoucher,
+        uint8 _type //0 .. payment, 1 .. deposits
+    );
 
     modifier onlyFromRouter() {
         require(bosonRouterAddress != address(0), "UNSPECIFIED_BR"); //hex"20" FISSION.code(FISSION.Category.Find, FISSION.Status.NotFound_Unequal_OutOfRange)
@@ -152,6 +178,21 @@ contract VoucherKernel is IVoucherKernel, Ownable, UsingHelpers {
         cancelFaultPeriod = 7 * 1 days;
     }
 
+    /**
+     * @notice Pause the process of interaction with voucherID's (ERC-721), in case of emergency.
+     * Only BR contract is in control of this function.
+     */
+    function pause() external override onlyFromRouter {
+        _pause();
+    }
+
+    /**
+     * @notice Unpause the process of interaction with voucherID's (ERC-721).
+     * Only BR contract is in control of this function.
+     */
+    function unpause() external override onlyFromRouter {
+        _unpause();
+    }
 
     /**
      * @notice Creating a new promise for goods or services.
@@ -227,6 +268,12 @@ contract VoucherKernel is IVoucherKernel, Ownable, UsingHelpers {
         address _tokenPrice,
         address _tokenDeposits
     ) external override onlyFromRouter {
+        require(
+            _paymentMethod > 0 &&
+                _paymentMethod <= 4,
+            "INVALID PAYMENT METHOD"
+        );
+        
         paymentDetails[_tokenIdSupply] = VoucherPaymentMethod({
             paymentMethod: _paymentMethod,
             addressTokenPrice: _tokenPrice,
@@ -381,6 +428,21 @@ contract VoucherKernel is IVoucherKernel, Ownable, UsingHelpers {
     }
 
     /**
+     * @notice Extract a standard non-fungible tokens ERC-721 from a supply stored in ERC-1155
+     * @dev Token ID is derived following the same principles for both ERC-1155 and ERC-721
+     * @param _issuer          The address of the token issuer
+     * @param _tokenIdSupply   ID of the token type
+     * @param _qty   qty that should be burned
+     */
+    function burnSupplyOnPause(
+        address _issuer,
+        uint256 _tokenIdSupply,
+        uint256 _qty
+    ) external override whenPaused onlyFromCashier {
+        IERC1155ERC721(tokensContract).burn(_issuer, _tokenIdSupply, _qty);
+    }
+
+    /**
      * @notice Creating a new token type, serving as the base for tokenID generation for NFTs, and a de facto ID for FTs.
      * @param _isNonFungible   Flag for generating NFT or FT
      * @return _tokenType   Returns a newly generated token type
@@ -410,6 +472,7 @@ contract VoucherKernel is IVoucherKernel, Ownable, UsingHelpers {
     function redeem(uint256 _tokenIdVoucher, address _msgSender)
         external
         override
+        whenNotPaused
         onlyFromRouter
         onlyVoucherOwner(_tokenIdVoucher, _msgSender)
     {
@@ -435,6 +498,374 @@ contract VoucherKernel is IVoucherKernel, Ownable, UsingHelpers {
             _msgSender,
             tPromise.promiseId
         );
+    }
+
+    // // // // // // // //
+    // UNHAPPY PATH
+    // // // // // // // //
+
+    /**
+     * @notice Refunding a voucher
+     * @param _tokenIdVoucher   ID of the voucher
+     * @param _msgSender   account called the fn from the BR contract
+     */
+    function refund(uint256 _tokenIdVoucher, address _msgSender)
+        external
+        override
+        whenNotPaused
+        onlyFromRouter
+        onlyVoucherOwner(_tokenIdVoucher, _msgSender)
+    {
+        require(
+            isStateCommitted(vouchersStatus[_tokenIdVoucher].status),
+            "INAPPLICABLE_STATUS"
+        ); //hex"18" FISSION.code(FISSION.Category.Permission, FISSION.Status.NotApplicableToCurrentState)
+
+        //check validity period
+        isInValidityPeriod(_tokenIdVoucher);
+
+        vouchersStatus[_tokenIdVoucher].complainPeriodStart = block.timestamp;
+        vouchersStatus[_tokenIdVoucher].status = determineStatus(
+            vouchersStatus[_tokenIdVoucher].status,
+            IDX_REFUND
+        );
+
+        emit LogVoucherRefunded(_tokenIdVoucher);
+    }
+
+    /**
+     * @notice Issue a complain for a voucher
+     * @param _tokenIdVoucher   ID of the voucher
+     * @param _msgSender   account called the fn from the BR contract
+     */
+    function complain(uint256 _tokenIdVoucher, address _msgSender)
+        external
+        override
+        whenNotPaused
+        onlyFromRouter
+        onlyVoucherOwner(_tokenIdVoucher, _msgSender)
+    {
+        require(
+            !isStatus(vouchersStatus[_tokenIdVoucher].status, IDX_COMPLAIN),
+            "ALREADY_COMPLAINED"
+        ); //hex"48" FISSION.code(FISSION.Category.Availability, FISSION.Status.AlreadyDone)
+        require(
+            !isStatus(vouchersStatus[_tokenIdVoucher].status, IDX_FINAL),
+            "ALREADY_FINALIZED"
+        ); //hex"48" FISSION.code(FISSION.Category.Availability, FISSION.Status.AlreadyDone)
+
+        //check if still in the complain period
+        Promise memory tPromise =
+            promises[getPromiseIdFromVoucherId(_tokenIdVoucher)];
+
+        //if redeemed or refunded
+        if (
+            isStateRedemptionSigned(vouchersStatus[_tokenIdVoucher].status) ||
+            isStateRefunded(vouchersStatus[_tokenIdVoucher].status)
+        ) {
+            if (
+                !isStatus(
+                    vouchersStatus[_tokenIdVoucher].status,
+                    IDX_CANCEL_FAULT
+                )
+            ) {
+                require(
+                    block.timestamp <=
+                        vouchersStatus[_tokenIdVoucher].complainPeriodStart +
+                            complainPeriod +
+                            cancelFaultPeriod,
+                    "COMPLAINPERIOD_EXPIRED"
+                ); //hex"46" FISSION.code(FISSION.Category.Availability, FISSION.Status.Expired)
+            } else {
+                require(
+                    block.timestamp <=
+                        vouchersStatus[_tokenIdVoucher].complainPeriodStart +
+                            complainPeriod,
+                    "COMPLAINPERIOD_EXPIRED"
+                ); //hex"46" FISSION.code(FISSION.Category.Availability, FISSION.Status.Expired)
+            }
+
+            vouchersStatus[_tokenIdVoucher].cancelFaultPeriodStart = block
+                .timestamp;
+            vouchersStatus[_tokenIdVoucher].status = determineStatus(
+                vouchersStatus[_tokenIdVoucher].status,
+                IDX_COMPLAIN
+            );
+
+            emit LogVoucherComplain(_tokenIdVoucher);
+
+            //if expired
+        } else if (isStateExpired(vouchersStatus[_tokenIdVoucher].status)) {
+            if (
+                !isStatus(
+                    vouchersStatus[_tokenIdVoucher].status,
+                    IDX_CANCEL_FAULT
+                )
+            ) {
+                require(
+                    block.timestamp <=
+                        tPromise.validTo + complainPeriod + cancelFaultPeriod,
+                    "COMPLAINPERIOD_EXPIRED"
+                ); //hex"46" FISSION.code(FISSION.Category.Availability, FISSION.Status.Expired)
+            } else {
+                require(
+                    block.timestamp <= tPromise.validTo + complainPeriod,
+                    "COMPLAINPERIOD_EXPIRED"
+                ); //hex"46" FISSION.code(FISSION.Category.Availability, FISSION.Status.Expired)
+            }
+
+            vouchersStatus[_tokenIdVoucher].cancelFaultPeriodStart = block
+                .timestamp;
+            vouchersStatus[_tokenIdVoucher].status = determineStatus(
+                vouchersStatus[_tokenIdVoucher].status,
+                IDX_COMPLAIN
+            );
+
+            emit LogVoucherComplain(_tokenIdVoucher);
+
+            //if cancelOrFault
+        } else if (
+            isStatus(vouchersStatus[_tokenIdVoucher].status, IDX_CANCEL_FAULT)
+        ) {
+            require(
+                block.timestamp <=
+                    vouchersStatus[_tokenIdVoucher].complainPeriodStart +
+                        complainPeriod,
+                "COMPLAINPERIOD_EXPIRED"
+            ); //hex"46" FISSION.code(FISSION.Category.Availability, FISSION.Status.Expired));
+
+            vouchersStatus[_tokenIdVoucher].status = determineStatus(
+                vouchersStatus[_tokenIdVoucher].status,
+                IDX_COMPLAIN
+            );
+
+            emit LogVoucherComplain(_tokenIdVoucher);
+        } else {
+            revert("INAPPLICABLE_STATUS"); //hex"18" FISSION.code(FISSION.Category.Permission, FISSION.Status.NotApplicableToCurrentState)
+        }
+    }
+
+    /**
+     * @notice Cancel/Fault transaction by the Seller, admitting to a fault or backing out of the deal
+     * @param _tokenIdVoucher   ID of the voucher
+     */
+    function cancelOrFault(uint256 _tokenIdVoucher, address _msgSender)
+        external
+        override
+        whenNotPaused
+    {
+        uint256 tokenIdSupply = getIdSupplyFromVoucher(_tokenIdVoucher);
+        require(
+            getSupplyHolder(tokenIdSupply) == _msgSender,
+            "UNAUTHORIZED_COF"
+        ); //hex"10" FISSION.code(FISSION.Category.Permission, FISSION.Status.Disallowed_Stop)
+
+        uint8 tStatus = vouchersStatus[_tokenIdVoucher].status;
+
+        require(!isStatus(tStatus, IDX_CANCEL_FAULT), "ALREADY_CANCELFAULT"); //hex"48" FISSION.code(FISSION.Category.Availability, FISSION.Status.AlreadyDone)
+        require(!isStatus(tStatus, IDX_FINAL), "ALREADY_FINALIZED"); //hex"48" FISSION.code(FISSION.Category.Availability, FISSION.Status.AlreadyDone)
+
+        Promise memory tPromise =
+            promises[getPromiseIdFromVoucherId(_tokenIdVoucher)];
+
+        if (isStatus(tStatus, IDX_REDEEM) || isStatus(tStatus, IDX_REFUND)) {
+            //if redeemed or refunded
+            if (!isStatus(tStatus, IDX_COMPLAIN)) {
+                require(
+                    block.timestamp <=
+                        vouchersStatus[_tokenIdVoucher].complainPeriodStart +
+                            complainPeriod +
+                            cancelFaultPeriod,
+                    "COFPERIOD_EXPIRED"
+                ); //hex"46" FISSION.code(FISSION.Category.Availability, FISSION.Status.Expired)
+                vouchersStatus[_tokenIdVoucher].complainPeriodStart = block
+                    .timestamp; //resetting the complain period
+            } else {
+                require(
+                    block.timestamp <=
+                        vouchersStatus[_tokenIdVoucher].cancelFaultPeriodStart +
+                            cancelFaultPeriod,
+                    "COFPERIOD_EXPIRED"
+                ); //hex"46" FISSION.code(FISSION.Category.Availability, FISSION.Status.Expired)
+            }
+        } else if (isStatus(tStatus, IDX_EXPIRE)) {
+            //if expired
+            if (!isStatus(tStatus, IDX_COMPLAIN)) {
+                require(
+                    block.timestamp <=
+                        tPromise.validTo + complainPeriod + cancelFaultPeriod,
+                    "COFPERIOD_EXPIRED"
+                ); //hex"46" FISSION.code(FISSION.Category.Availability, FISSION.Status.Expired)
+            } else {
+                require(
+                    block.timestamp <=
+                        vouchersStatus[_tokenIdVoucher].cancelFaultPeriodStart +
+                            cancelFaultPeriod,
+                    "COFPERIOD_EXPIRED"
+                ); //hex"46" FISSION.code(FISSION.Category.Availability, FISSION.Status.Expired)
+            }
+        } else if (isStateCommitted(tStatus)) {
+            //if committed only
+            require(
+                block.timestamp <=
+                    tPromise.validTo + complainPeriod + cancelFaultPeriod,
+                "COFPERIOD_EXPIRED"
+            ); //hex"46" FISSION.code(FISSION.Category.Availability, FISSION.Status.Expired)
+            vouchersStatus[_tokenIdVoucher].complainPeriodStart = block
+                .timestamp; //complain period starts
+        } else {
+            revert("INAPPLICABLE_STATUS"); //hex"18" FISSION.code(FISSION.Category.Permission, FISSION.Status.NotApplicableToCurrentState)
+        }
+
+        vouchersStatus[_tokenIdVoucher].status = determineStatus(
+            tStatus,
+            IDX_CANCEL_FAULT
+        );
+
+        emit LogVoucherFaultCancel(_tokenIdVoucher);
+    }
+
+    /**
+     * @notice Cancel/Fault transaction by the Seller, cancelling the remaining uncommitted voucher set so that seller prevents buyers from committing to vouchers for items no longer in exchange.
+     * @param _tokenIdSupply   ID of the voucher set
+     * @param _issuer   owner of the voucher
+     */
+    function cancelOrFaultVoucherSet(uint256 _tokenIdSupply, address _issuer)
+        external
+        override
+        onlyFromRouter
+        whenNotPaused
+        returns (uint256)
+    {
+        require(getSupplyHolder(_tokenIdSupply) == _issuer, "UNAUTHORIZED_COF");
+
+        uint256 remQty = getRemQtyForSupply(_tokenIdSupply, _issuer);
+
+        require(remQty > 0, "OFFER_EMPTY");
+
+        IERC1155ERC721(tokensContract).burn(_issuer, _tokenIdSupply, remQty);
+
+        emit LogVoucherSetFaultCancel(_tokenIdSupply, _issuer);
+
+        return remQty;
+    }
+
+    // // // // // // // //
+    // BACK-END PROCESS
+    // // // // // // // //
+
+    /**
+     * @notice Mark voucher token that the payment was released
+     * @param _tokenIdVoucher   ID of the voucher token
+     */
+    function setPaymentReleased(uint256 _tokenIdVoucher)
+        external
+        override
+        onlyFromCashier
+    {
+        require(_tokenIdVoucher != 0, "UNSPECIFIED_ID"); //hex"20" FISSION.code(FISSION.Category.Find, FISSION.Status.NotFound_Unequal_OutOfRange)
+        vouchersStatus[_tokenIdVoucher].isPaymentReleased = true;
+
+        emit LogFundsReleased(_tokenIdVoucher, 0);
+    }
+
+    /**
+     * @notice Mark voucher token that the deposits were released
+     * @param _tokenIdVoucher   ID of the voucher token
+     */
+    function setDepositsReleased(uint256 _tokenIdVoucher)
+        external
+        override
+        onlyFromCashier
+    {
+        require(_tokenIdVoucher != 0, "UNSPECIFIED_ID"); //hex"20" FISSION.code(FISSION.Category.Find, FISSION.Status.NotFound_Unequal_OutOfRange)
+        vouchersStatus[_tokenIdVoucher].isDepositsReleased = true;
+
+        emit LogFundsReleased(_tokenIdVoucher, 1);
+    }
+
+    /**
+     * @notice Mark voucher token as expired
+     * @param _tokenIdVoucher   ID of the voucher token
+     */
+    function triggerExpiration(uint256 _tokenIdVoucher) external override {
+        require(_tokenIdVoucher != 0, "UNSPECIFIED_ID"); //hex"20" FISSION.code(FISSION.Category.Find, FISSION.Status.NotFound_Unequal_OutOfRange)
+
+        Promise memory tPromise =
+            promises[getPromiseIdFromVoucherId(_tokenIdVoucher)];
+
+        if (
+            tPromise.validTo < block.timestamp &&
+            isStateCommitted(vouchersStatus[_tokenIdVoucher].status)
+        ) {
+            vouchersStatus[_tokenIdVoucher].status = determineStatus(
+                vouchersStatus[_tokenIdVoucher].status,
+                IDX_EXPIRE
+            );
+
+            emit LogExpirationTriggered(_tokenIdVoucher, msg.sender);
+        }
+    }
+
+    /**
+     * @notice Mark voucher token to the final status
+     * @param _tokenIdVoucher   ID of the voucher token
+     */
+    function triggerFinalizeVoucher(uint256 _tokenIdVoucher) external override {
+        require(_tokenIdVoucher != 0, "UNSPECIFIED_ID"); //hex"20" FISSION.code(FISSION.Category.Find, FISSION.Status.NotFound_Unequal_OutOfRange)
+
+        uint8 tStatus = vouchersStatus[_tokenIdVoucher].status;
+
+        require(!isStatus(tStatus, IDX_FINAL), "ALREADY_FINALIZED"); //hex"48" FISSION.code(FISSION.Category.Availability, FISSION.Status.AlreadyDone)
+
+        bool mark;
+        Promise memory tPromise =
+            promises[getPromiseIdFromVoucherId(_tokenIdVoucher)];
+
+        if (isStatus(tStatus, IDX_COMPLAIN)) {
+            if (isStatus(tStatus, IDX_CANCEL_FAULT)) {
+                //if COMPLAIN && COF: then final
+                mark = true;
+            } else if (
+                block.timestamp >=
+                vouchersStatus[_tokenIdVoucher].cancelFaultPeriodStart +
+                    cancelFaultPeriod
+            ) {
+                //if COMPLAIN: then final after cof period
+                mark = true;
+            }
+        } else if (
+            isStatus(tStatus, IDX_CANCEL_FAULT) &&
+            block.timestamp >=
+            vouchersStatus[_tokenIdVoucher].complainPeriodStart + complainPeriod
+        ) {
+            //if COF: then final after complain period
+            mark = true;
+        } else if (
+            isStateRedemptionSigned(tStatus) || isStateRefunded(tStatus)
+        ) {
+            //if RDM/RFND NON_COMPLAIN: then final after complainPeriodStart + complainPeriod
+            if (
+                block.timestamp >=
+                vouchersStatus[_tokenIdVoucher].complainPeriodStart +
+                    complainPeriod
+            ) {
+                mark = true;
+            }
+        } else if (isStateExpired(tStatus)) {
+            //if EXP NON_COMPLAIN: then final after validTo + complainPeriod
+            if (block.timestamp >= tPromise.validTo + complainPeriod) {
+                mark = true;
+            }
+        }
+
+        if (mark) {
+            vouchersStatus[_tokenIdVoucher].status = determineStatus(
+                tStatus,
+                IDX_FINAL
+            );
+            emit LogFinalizeVoucher(_tokenIdVoucher, msg.sender);
+        }
     }
 
     /* solhint-enable */
@@ -487,10 +918,51 @@ contract VoucherKernel is IVoucherKernel, Ownable, UsingHelpers {
         emit LogCashierSet(_cashierAddress, msg.sender);
     }
 
+    /**
+     * @notice Set the general complain period, should be used sparingly as it has significant consequences. Here done simply for demo purposes.
+     * @param _complainPeriod   the new value for complain period (in number of seconds)
+     */
+    function setComplainPeriod(uint256 _complainPeriod)
+        external
+        override
+        onlyOwner
+    {
+        complainPeriod = _complainPeriod;
+
+        emit LogComplainPeriodChanged(_complainPeriod, msg.sender);
+    }
+
+    /**
+     * @notice Set the general cancelOrFault period, should be used sparingly as it has significant consequences. Here done simply for demo purposes.
+     * @param _cancelFaultPeriod   the new value for cancelOrFault period (in number of seconds)
+     */
+    function setCancelFaultPeriod(uint256 _cancelFaultPeriod)
+        external
+        override
+        onlyOwner
+    {
+        cancelFaultPeriod = _cancelFaultPeriod;
+
+        emit LogCancelFaultPeriodChanged(_cancelFaultPeriod, msg.sender);
+    }
 
     // // // // // // // //
     // GETTERS
     // // // // // // // //
+
+    /**
+     * @notice Get the promise ID at specific index
+     * @param _idx  Index in the array of promise keys
+     * @return      Promise ID
+     */
+    function getPromiseKey(uint256 _idx)
+        public
+        view
+        override
+        returns (bytes32)
+    {
+        return promiseKeys[_idx];
+    }
 
     /**
      * @notice Get the supply token ID from a voucher token
@@ -521,6 +993,21 @@ contract VoucherKernel is IVoucherKernel, Ownable, UsingHelpers {
 
         uint256 tokenIdSupply = getIdSupplyFromVoucher(_tokenIdVoucher);
         return promises[ordersPromise[tokenIdSupply]].promiseId;
+    }
+
+    /**
+     * @notice Get the remaining quantity left in supply of tokens (e.g ERC-721 left in ERC-1155) of an account
+     * @param _tokenSupplyId  Token supply ID
+     * @param _owner    holder of the Token Supply
+     * @return          remaining quantity
+     */
+    function getRemQtyForSupply(uint256 _tokenSupplyId, address _owner)
+        public
+        view
+        override
+        returns (uint256)
+    {
+        return IERC1155(tokensContract).balanceOf(_owner, _tokenSupplyId);
     }
 
     /**
@@ -574,6 +1061,57 @@ contract VoucherKernel is IVoucherKernel, Ownable, UsingHelpers {
     {
         bytes32 promiseKey = ordersPromise[_tokenIdSupply];
         return promises[promiseKey].depositSe;
+    }
+
+    /**
+     * @notice Get the current status of a voucher
+     * @param _tokenIdVoucher   ID of the voucher token
+     * @return                  Status of the voucher (via enum)
+     */
+    function getVoucherStatus(uint256 _tokenIdVoucher)
+        public
+        view
+        override
+        returns (
+            uint8,
+            bool,
+            bool
+        )
+    {
+        return (
+            vouchersStatus[_tokenIdVoucher].status,
+            vouchersStatus[_tokenIdVoucher].isPaymentReleased,
+            vouchersStatus[_tokenIdVoucher].isDepositsReleased
+        );
+    }
+
+    /**
+     * @notice Get the holder of a voucher
+     * @param _tokenIdVoucher   ID of the voucher token
+     * @return                  Address of the holder
+     */
+    function getVoucherHolder(uint256 _tokenIdVoucher)
+        public
+        view
+        override
+        returns (address)
+    {
+        return IERC721(tokensContract).ownerOf(_tokenIdVoucher);
+    }
+
+    /**
+     * @notice Get the holder of a supply
+     * @param _tokenIdSupply        ID of a promise which is mapped to the corresponding Promise
+     * @return                  Address of the holder
+     */
+    function getSupplyHolder(uint256 _tokenIdSupply)
+        public
+        view
+        override
+        returns (address)
+    {
+        bytes32 promiseKey = ordersPromise[_tokenIdSupply];
+        return promises[promiseKey].seller;
     }
 
     /**
@@ -641,10 +1179,14 @@ contract VoucherKernel is IVoucherKernel, Ownable, UsingHelpers {
      * @notice Checks whether a voucher is in valid state to be transferred. If either payments or deposits are released, voucher could not be transferred
      * @param _tokenIdVoucher ID of the voucher token
      */
-    function isVoucherTransferable(uint256 _tokenIdVoucher) public override view returns (bool) {
-        return !(
-            vouchersStatus[_tokenIdVoucher].isPaymentReleased || 
-            vouchersStatus[_tokenIdVoucher].isDepositsReleased
-        );
+    function isVoucherTransferable(uint256 _tokenIdVoucher)
+        public
+        view
+        override
+        returns (bool)
+    {
+        return
+            !(vouchersStatus[_tokenIdVoucher].isPaymentReleased ||
+                vouchersStatus[_tokenIdVoucher].isDepositsReleased);
     }
 }
