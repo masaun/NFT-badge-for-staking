@@ -5,7 +5,7 @@ const mnemonic = process.env.MNEMONIC;
 
 module.exports = {
   networks: {
-    polygon_testnet: {  /// Mumbai testnet of Matic
+    polygon_mumbai: {  /// Mumbai testnet of Matic
       provider: () => new HDWalletProvider(mnemonic, "https://rpc-mumbai.matic.today"),
       network_id: 80001,
       confirmations: 2,

@@ -13,7 +13,7 @@ const VoucherKernel = artifacts.require('VoucherKernel');
 const Cashier = artifacts.require('Cashier');
 const BosonRouter = artifacts.require('BosonRouter');
 const FundLimitsOracle = artifacts.require('FundLimitsOracle');
-//const MockBosonRouter = artifacts.require('MockBosonRouter');
+const MockBosonRouter = artifacts.require('MockBosonRouter');
 const BN = web3.utils.BN;
 
 contract('Voucher tests', async (addresses) => {
@@ -48,11 +48,11 @@ contract('Voucher tests', async (addresses) => {
       contractCashier.address
     );
 
-    // contractMockBosonRouter = await MockBosonRouter.new(
-    //   contractVoucherKernel.address,
-    //   contractFundLimitsOracle.address,
-    //   contractCashier.address
-    // );
+    contractMockBosonRouter = await MockBosonRouter.new(
+      contractVoucherKernel.address,
+      contractFundLimitsOracle.address,
+      contractCashier.address
+    );
 
     await contractERC1155ERC721.setApprovalForAll(
       contractVoucherKernel.address,
