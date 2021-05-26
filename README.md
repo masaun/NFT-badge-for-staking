@@ -30,6 +30,8 @@
 ## 【Setup】for Hardhat
 ```
 npm run hardhat:node  (<--Instead of ganache-cli)
+npm run hardhat-test:boson-x-chain
+
 npm run hardhat-test:boson
 ```
 

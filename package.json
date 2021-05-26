@@ -15,6 +15,7 @@
     "compile:polygon_testnet": "truffle compile --reset --network polygon_testnet",
     "migrate:polygon_testnet": "truffle migrate --reset --network polygon_testnet",
     "hardhat:node": "npx hardhat node",
+    "hardhat-test:boson-x-chain": "truffle test ./test/test-local/boson-x-chain/*  --network local",
     "hardhat-test:boson": "truffle test ./test/test-local/boson/*  --network local"
   },
   "author": "masaun",
