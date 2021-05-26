@@ -50,7 +50,7 @@ npm install
 ### ② Compile contracts
 - on Polygon (Matic) mumbai testnet
 ```
-npm run compile:polygon_testnet
+npm run compile:polygon_mumbai
 ```
 
 <br>

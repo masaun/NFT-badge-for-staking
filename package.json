@@ -12,8 +12,8 @@
     "script:Something": "truffle exec ./scripts/polygon-matic/Something.script.js --network polygon_testnet",
     "compile:local": "truffle compile --reset --network local",
     "migrate:local": "truffle migrate --reset --network local",
-    "compile:polygon_testnet": "truffle compile --reset --network polygon_testnet",
-    "migrate:polygon_testnet": "truffle migrate --reset --network polygon_testnet",
+    "compile:polygon_mumbai": "truffle compile --reset --network polygon_mumbai",
+    "migrate:polygon_mumbai": "truffle migrate --reset --network polygon_mumbai",
     "hardhat:node": "npx hardhat node",
     "hardhat-test:boson-x-chain": "truffle test ./test/test-local/boson-x-chain/*  --network local",
     "hardhat-test:boson": "truffle test ./test/test-local/boson/*  --network local"

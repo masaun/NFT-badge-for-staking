@@ -61,6 +61,34 @@ contract UsingHelpers {
     }
 
     /**
+     * @notice Based on its lifecycle, voucher can have many different statuses. Checks whether a voucher is in RedemptionSigned state.
+     * @param _status current status of a voucher.
+     */
+    function isStateRedemptionSigned(uint8 _status)
+        internal
+        pure
+        returns (bool)
+    {
+        return _status == determineStatus(determineStatus(0, IDX_COMMIT), IDX_REDEEM);
+    }
+
+    /**
+     * @notice Based on its lifecycle, voucher can have many different statuses. Checks whether a voucher is in Refunded state.
+     * @param _status current status of a voucher.
+     */
+    function isStateRefunded(uint8 _status) internal pure returns (bool) {
+        return _status == determineStatus(determineStatus(0, IDX_COMMIT), IDX_REFUND);
+    }
+
+    /**
+     * @notice Based on its lifecycle, voucher can have many different statuses. Checks whether a voucher is in Expired state.
+     * @param _status current status of a voucher.
+     */
+    function isStateExpired(uint8 _status) internal pure returns (bool) {
+        return _status == determineStatus(determineStatus(0, IDX_COMMIT), IDX_EXPIRE);
+    }
+
+    /**
      * @notice Based on its lifecycle, voucher can have many different statuses. Checks the current status a voucher is at.
      * @param _status current status of a voucher.
      * @param _idx status to compare.
