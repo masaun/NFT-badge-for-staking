@@ -27,6 +27,14 @@
 &nbsp;
 
 ***
+## 【Setup】for Hardhat
+```
+npm run hardhat:node  (<--Instead of ganache-cli)
+npm run hardhat-test:boson
+```
+
+
+<br>
 
 ## 【Setup】
 ### ① Install modules
