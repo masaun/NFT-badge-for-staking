@@ -11,4 +11,11 @@ contract FanRegister {
         fans.push(msg.sender);
     }
 
+    //-----------------
+    // Getter methods
+    //-----------------
+    function getFans() public view returns (address[] memory _fans) {
+        return fans;
+    }
+
 }
