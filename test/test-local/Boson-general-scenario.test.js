@@ -35,11 +35,14 @@ const FundLimitsOracle = artifacts.require('FundLimitsOracle')
  * @notice - [Execution command]: $ truffle test ./test/test-local/GeyserFactory.test.js
  * @notice - [Using kovan-fork with Ganache-CLI and Infura]: Please reference from README
  */
-contract("Boson General Scenatio", function(accounts) {
+contract("Boson General Scenatio (Voucher tests)", function(accounts) {
     /// Acccounts
     let deployer = accounts[0]
     let seller = accounts[1]
     let buyer = accounts[2]
+    let attacker = accounts[3]
+    let other1 = accounts[4]
+    let other2 = accounts[5]
 
     /// Global contract instance
     let erc1155ERC721
@@ -62,6 +65,10 @@ contract("Boson General Scenatio", function(accounts) {
     let BOSON_ROUTER
     let FUND_LIMITS_ORACLE
 
+    function toWei(amount) {
+        return web3.utils.toWei(`${ amount }`, 'ether')
+    }
+
     async function getEvents(contractInstance, eventName) {
         const _latestBlock = await time.latestBlock()
         const LATEST_BLOCK = Number(String(_latestBlock))
@@ -76,6 +83,12 @@ contract("Boson General Scenatio", function(accounts) {
         //console.log(`\n=== [Event log]: ${ eventName } ===`, events[0].returnValues)
         return events[0].returnValues
     } 
+
+    beforeEach('execute prerequisite steps', async () => {
+        const timestamp = await Utils.getCurrTimestamp()
+        constants.PROMISE_VALID_FROM = timestamp
+        constants.PROMISE_VALID_TO = timestamp + 2 * constants.SECONDS_IN_DAY
+    })
 
     describe("Setup smart-contracts", () => {
         it("Deploy the ERC1155ERC721 contract instance", async () => {
@@ -94,13 +107,32 @@ contract("Boson General Scenatio", function(accounts) {
         })
 
         it("Deploy the Cashier contract instance", async () => {
-            cashier = await Cashier.new(VOUCHER_KERNEL,{ from: deployer })
+            cashier = await Cashier.new(VOUCHER_KERNEL, { from: deployer })
             CASHIER = cashier.address
         })
 
         it("Deploy the BosonRouter contract instance", async () => {
             bosonRouter = await BosonRouter.new(VOUCHER_KERNEL, FUND_LIMITS_ORACLE, CASHIER, { from: deployer })
             BOSON_ROUTER = bosonRouter.address
+        })
+
+        it("Set each contract addressed into each contract", async () => {
+            const sixtySeconds = 60
+
+            /// Approval for all
+            await erc1155ERC721.setApprovalForAll(VOUCHER_KERNEL, 'true')
+
+            /// Set each contract addresses
+            await erc1155ERC721.setVoucherKernelAddress(VOUCHER_KERNEL)
+            await erc1155ERC721.setCashierAddress(CASHIER)
+            await voucherKernel.setBosonRouterAddress(BOSON_ROUTER)
+            await voucherKernel.setCashierAddress(CASHIER)
+            await cashier.setBosonRouterAddress(BOSON_ROUTER)
+            await cashier.setTokenContractAddress(ERC1155_ERC721)
+            
+            /// [Todo]: TypeError: voucherKernel.setComplainPeriod is not a function
+            //await voucherKernel.setComplainPeriod(sixtySeconds)
+            //await voucherKernel.setCancelFaultPeriod(sixtySeconds)
         })
 
         it("[Log]: Deployed-contracts addresses", async () => {
@@ -111,6 +143,8 @@ contract("Boson General Scenatio", function(accounts) {
             console.log("=== BOSON_ROUTER ===", BOSON_ROUTER)
         })
     })
+
+
 
     describe("Create Voucher Sets (ERC1155)", () => {
         it("adding one new order / promise", async () => {
