@@ -198,16 +198,16 @@ contract("Boson General Scenatio (Voucher tests)", function(accounts) {
                 internalVoucherKernelTx,
                 'LogPromiseCreated',
                 (ev) => {
-                  promiseId1 = ev._promiseId
+                    promiseId1 = ev._promiseId
 
-                  return (
-                    ev._promiseId > 0 &&
-                    ev._nonce.eq(constants.ONE) &&
-                    ev._seller === seller &&
-                    ev._validFrom.eq(new BN(constants.PROMISE_VALID_FROM)) &&
-                    ev._validTo.eq(new BN(constants.PROMISE_VALID_TO)) &&
-                    ev._idx.eq(constants.ZERO)
-                  );
+                    return (
+                        ev._promiseId > 0 &&
+                        ev._nonce.eq(constants.ONE) &&
+                        ev._seller === seller &&
+                        ev._validFrom.eq(new BN(constants.PROMISE_VALID_FROM)) &&
+                        ev._validTo.eq(new BN(constants.PROMISE_VALID_TO)) &&
+                        ev._idx.eq(constants.ZERO)
+                    )
                 },
                 'promise event incorrect'
             )
@@ -219,6 +219,10 @@ contract("Boson General Scenatio (Voucher tests)", function(accounts) {
             /// Order a promise
             const orderPromiseId = await voucherKernel.ordersPromise(
                 tokenSupplyKey1
+            )
+
+            const tokenNonce = await contractVoucherKernel.tokenNonces(
+                seller
             )
 
             /// Check ERC1155ERC721 state
@@ -249,13 +253,43 @@ contract("Boson General Scenatio (Voucher tests)", function(accounts) {
                 txFillOrder.tx
             )
 
-            /// Assign a tokenVoucher key
+            /// Assign a tokenVoucher key 1
+            truffleAssert.eventEmitted(
+                internalTx,
+                'LogVoucherDelivered',
+                (ev) => {
+                    tokenVoucherKey1 = ev._tokenIdVoucher
+                    console.log('=== tokenVoucherKey1 ===', tokenVoucherKey1)
+
+                    return ev._tokenIdVoucher.gt(constants.ZERO)
+                },
+                'order1 not created successfully'
+            )
         })
     })
 
     describe("Vouchers (ERC721)", () => {
         it("redeeming one voucher", async () => {
             /// [Todo]:
+            const txRedeem = await bosonRouter.redeem(tokenVoucherKey1, { from: buyer })
+
+            const internalTx = await truffleAssert.createTransactionResult(
+                voucherKernel,
+                txRedeem.tx
+            )
+
+            truffleAssert.eventEmitted(
+                internalTx,
+                'LogVoucherRedeemed',
+                (ev) => {
+                    return (
+                        ev._tokenIdVoucher.eq(tokenVoucherKey1) &&
+                        ev._holder === buyer &&
+                        ev._promiseId == promiseId1
+                    )
+                },
+                'voucher not redeemed successfully'
+            )
         })
     })
 })
