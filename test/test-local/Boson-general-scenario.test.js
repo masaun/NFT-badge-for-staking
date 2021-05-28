@@ -130,7 +130,7 @@ contract("Boson General Scenatio (Voucher tests)", function(accounts) {
             await cashier.setBosonRouterAddress(BOSON_ROUTER)
             await cashier.setTokenContractAddress(ERC1155_ERC721)
             
-            /// [Todo]: TypeError: voucherKernel.setComplainPeriod is not a function
+            /// [Todo]: "TypeError: voucherKernel.setComplainPeriod is not a function"
             //await voucherKernel.setComplainPeriod(sixtySeconds)
             //await voucherKernel.setCancelFaultPeriod(sixtySeconds)
         })
@@ -148,6 +148,7 @@ contract("Boson General Scenatio (Voucher tests)", function(accounts) {
 
     describe("Create Voucher Sets (ERC1155)", () => {
         it("adding one new order / promise", async () => {
+            /// Request to create a order ETH/ETH
             const txOrder = await bosonRouter.requestCreateOrderETHETH(
                 [
                     constants.PROMISE_VALID_FROM,
@@ -164,13 +165,30 @@ contract("Boson General Scenatio (Voucher tests)", function(accounts) {
                 }
             )
 
+            /// Assign totalSupply key 1
             let tokenSupplyKey1
+
+            truffleAssert.eventEmitted(
+                txOrder,
+                'LogOrderCreated',
+                (ev) => {
+                  tokenSupplyKey1 = ev._tokenIdSupply;
+                  return (
+                    ev._tokenIdSupply.gt(constants.ZERO) &&
+                    ev._seller === seller &&
+                    ev._quantity.eq(new BN(constants.ORDER_QUANTITY1)) &&
+                    ev._paymentType.eq(constants.ONE) &&
+                    ev._correlationId.eq(constants.ZERO)
+                  )
+                },
+                'order1 event incorrect'
+            )
+
         })
     })
 
     describe("Commit to buy a voucher (ERC1155)", () => {
         it("fill one order (aka commit to buy a voucher)", async () => {
-            /// [Todo]:
         })
     })
 
