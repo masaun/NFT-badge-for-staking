@@ -120,15 +120,15 @@ contract("Boson General Scenatio (Voucher tests)", function(accounts) {
             const sixtySeconds = 60
 
             /// Approval for all
-            await erc1155ERC721.setApprovalForAll(VOUCHER_KERNEL, 'true')
+            await erc1155ERC721.setApprovalForAll(VOUCHER_KERNEL, 'true', { from: deployer })
 
             /// Set each contract addresses
-            await erc1155ERC721.setVoucherKernelAddress(VOUCHER_KERNEL)
-            await erc1155ERC721.setCashierAddress(CASHIER)
-            await voucherKernel.setBosonRouterAddress(BOSON_ROUTER)
-            await voucherKernel.setCashierAddress(CASHIER)
-            await cashier.setBosonRouterAddress(BOSON_ROUTER)
-            await cashier.setTokenContractAddress(ERC1155_ERC721)
+            await erc1155ERC721.setVoucherKernelAddress(VOUCHER_KERNEL, { from: deployer })
+            await erc1155ERC721.setCashierAddress(CASHIER, { from: deployer })
+            await voucherKernel.setBosonRouterAddress(BOSON_ROUTER, { from: deployer })
+            await voucherKernel.setCashierAddress(CASHIER, { from: deployer })
+            await cashier.setBosonRouterAddress(BOSON_ROUTER, { from: deployer })
+            await cashier.setTokenContractAddress(ERC1155_ERC721, { from: deployer })
             
             /// [Todo]: "TypeError: voucherKernel.setComplainPeriod is not a function"
             //await voucherKernel.setComplainPeriod(sixtySeconds)
@@ -181,13 +181,6 @@ contract("Boson General Scenatio (Voucher tests)", function(accounts) {
                 'order1 event incorrect'
             )
 
-            /// Check BosonRouter state
-            assert.equal(
-                await bosonRouter.correlationIds(seller),
-                1,
-                'Correlation Id incorrect'
-            )
-
             const internalVoucherKernelTx = await truffleAssert.createTransactionResult(
                 voucherKernel,
                 txOrder.tx
@@ -212,8 +205,34 @@ contract("Boson General Scenatio (Voucher tests)", function(accounts) {
                 'promise event incorrect'
             )
 
-            /// [Todo]: Assign promise
-            console.log('=== promiseId1 ===', String(promiseId1))
+            const internalTokenTx = await truffleAssert.createTransactionResult(
+                erc1155ERC721,
+                txOrder.tx
+            )
+
+            truffleAssert.eventEmitted(
+                internalTokenTx,
+                'TransferSingle',
+                (ev) => {
+                  return (
+                    ev._operator === VOUCHER_KERNEL &&
+                    ev._from === constants.ZERO_ADDRESS &&
+                    ev._to == seller &&
+                    ev._id.eq(tokenSupplyKey1) &&
+                    ev._value.eq(new BN(constants.ORDER_QUANTITY1))
+                  );
+                },
+                'transfer event incorrect'
+            )
+
+            /// Check BosonRouter state
+            assert.equal(
+                await bosonRouter.correlationIds(seller),
+                1,
+                'Correlation Id incorrect'
+            )
+
+            /// Check VocherKernel State (Assign value into promise)
             const promise = await voucherKernel.promises(promiseId1)
 
             /// Order a promise
@@ -221,7 +240,7 @@ contract("Boson General Scenatio (Voucher tests)", function(accounts) {
                 tokenSupplyKey1
             )
 
-            const tokenNonce = await contractVoucherKernel.tokenNonces(
+            const tokenNonce = await voucherKernel.tokenNonces(
                 seller
             )
 
@@ -236,6 +255,92 @@ contract("Boson General Scenatio (Voucher tests)", function(accounts) {
     })
 
     describe("Commit to buy a voucher (ERC1155)", () => {
+        beforeEach('execute prerequisite steps', async () => {
+            //Create first voucher set
+            const txOrder = await bosonRouter.requestCreateOrderETHETH(
+                [
+                  constants.PROMISE_VALID_FROM,
+                  constants.PROMISE_VALID_TO,
+                  constants.PROMISE_PRICE1,
+                  constants.PROMISE_DEPOSITSE1,
+                  constants.PROMISE_DEPOSITBU1,
+                  constants.ORDER_QUANTITY1,
+                ],
+                {
+                  from: seller,
+                  to: BOSON_ROUTER,
+                  value: constants.PROMISE_DEPOSITSE1,
+                }
+            )
+
+            truffleAssert.eventEmitted(
+                txOrder,
+                'LogOrderCreated',
+                (ev) => {
+                  tokenSupplyKey1 = ev._tokenIdSupply;
+                  return ev._tokenIdSupply.gt(constants.ZERO);
+                },
+                'order1 not created successfully'
+            )
+
+            const internalVoucherKernelTx = await truffleAssert.createTransactionResult(
+                voucherKernel,
+                txOrder.tx
+            )
+
+            truffleAssert.eventEmitted(
+                internalVoucherKernelTx,
+                'LogPromiseCreated',
+                (ev) => {
+                    promiseId1 = ev._promiseId;
+                    return ev._promiseId > 0;
+                },
+                'promise event incorrect'
+            )
+
+            //Create 2nd voucher set
+            const txOrder2 = await bosonRouter.requestCreateOrderETHETH(
+                [
+                    constants.PROMISE_VALID_FROM,
+                    constants.PROMISE_VALID_TO,
+                    constants.PROMISE_PRICE2,
+                    constants.PROMISE_DEPOSITSE2,
+                    constants.PROMISE_DEPOSITBU2,
+                    constants.ORDER_QUANTITY2,
+                ],
+                {
+                    from: seller,
+                    to: CASHIER,
+                    value: constants.PROMISE_DEPOSITSE2,
+                }
+            )
+
+            truffleAssert.eventEmitted(
+                txOrder2,
+                'LogOrderCreated',
+                (ev) => {
+                    tokenSupplyKey2 = ev._tokenIdSupply;
+                    return ev._tokenIdSupply.gt(constants.ZERO);
+                },
+                'order2 event incorrect'
+            )
+
+            const internalVoucherKernelTx2 = await truffleAssert.createTransactionResult(
+                voucherKernel,
+                txOrder2.tx
+            )
+
+            truffleAssert.eventEmitted(
+                internalVoucherKernelTx2,
+                'LogPromiseCreated',
+                (ev) => {
+                    promiseId2 = ev._promiseId;
+                    return ev._promiseId > 0;
+                },
+                'promise event incorrect'
+            )
+        })
+
         it("fill one order (aka commit to buy a voucher)", async () => {
             /// Buyer commits
             const txFillOrder = await bosonRouter.requestVoucherETHETH(
@@ -249,7 +354,7 @@ contract("Boson General Scenatio (Voucher tests)", function(accounts) {
             )
 
             const internalTx = await truffleAssert.createTransactionResult(
-                VOUCHER_KERNEL,
+                voucherKernel,
                 txFillOrder.tx
             )
 
