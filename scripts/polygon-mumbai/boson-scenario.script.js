@@ -102,28 +102,31 @@ async function executeAllMethods() {
     const promises = [];
     console.log(" Setting initial values ...");
 
-    await erc1155ERC721.setApprovalForAll(voucherKernel.address, 'true')
-    console.log("\n ERC1155ERC721 approved VoucherKernel");
+    ///--------------------------
+    /// Only owner and only once
+    ///--------------------------
+    // await erc1155ERC721.setApprovalForAll(voucherKernel.address, 'true')
+    // console.log("\n ERC1155ERC721 approved VoucherKernel");
 
-    await erc1155ERC721.setVoucherKernelAddress(voucherKernel.address)
-    console.log("\n ERC1155ERC721 set VoucherKernel address")
+    // await erc1155ERC721.setVoucherKernelAddress(voucherKernel.address)
+    // console.log("\n ERC1155ERC721 set VoucherKernel address")
 
-    await erc1155ERC721.setCashierAddress(cashier.address)
-    console.log("\n ERC1155ERC721 set Cashier address");
+    // await erc1155ERC721.setCashierAddress(cashier.address)
+    // console.log("\n ERC1155ERC721 set Cashier address");
 
-    await voucherKernel.setBosonRouterAddress(bosonRouter.address)
-    console.log("\n VoucherKernel set BosonRouter address");
+    // await voucherKernel.setBosonRouterAddress(bosonRouter.address)
+    // console.log("\n VoucherKernel set BosonRouter address");
 
-    await voucherKernel.setCashierAddress(cashier.address)
-    console.log("\n VoucherKernel set Cashier address");
+    // await voucherKernel.setCashierAddress(cashier.address)
+    // console.log("\n VoucherKernel set Cashier address");
 
-    await cashier.setBosonRouterAddress(bosonRouter.address)
-    console.log("\n Cashier set BosonRouter address");
+    // await cashier.setBosonRouterAddress(bosonRouter.address)
+    // console.log("\n Cashier set BosonRouter address");
 
-    await cashier.setTokenContractAddress(erc1155ERC721.address)
-    console.log("\n Cashier set token contract address");
+    // await cashier.setTokenContractAddress(erc1155ERC721.address)
+    // console.log("\n Cashier set token contract address");
 
-    console.log('\n$ All done !')
+    // console.log('\n$ All done !')
 
 
     ///----------------------------------
