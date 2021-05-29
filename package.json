@@ -9,6 +9,7 @@
   "scripts": {
     "test": "truffle test ./test/test-local/* --network local",
     "test:Boson-General-Scenario": "truffle test ./test/test-local/Boson-general-scenario.test.js --network local",
+    "test:boson-scenario": "truffle test ./test/test-local/boson-scenario.test.js --network local",
     "script:Something": "truffle exec ./scripts/polygon-matic/Something.script.js --network polygon_testnet",
     "compile:local": "truffle compile --reset --network local",
     "migrate:local": "truffle migrate --reset --network local",
