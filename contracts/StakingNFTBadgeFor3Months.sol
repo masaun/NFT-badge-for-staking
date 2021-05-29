@@ -4,7 +4,7 @@ pragma solidity 0.6.12;
 import { ERC721 } from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import { Counters } from "@openzeppelin/contracts/utils/Counters.sol";
 
-contract SynthetixStakingNFTBadgeFor3Months is ERC721 {
+contract StakingNFTBadgeFor3Months is ERC721 {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
 
