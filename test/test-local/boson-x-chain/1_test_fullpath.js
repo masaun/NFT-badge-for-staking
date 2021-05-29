@@ -25,6 +25,7 @@ contract('Voucher tests', async (accounts) => {
     contractBosonRouter,
     contractLocalOracle,
     contractFundLimitsOracle;
+
   let tokenSupplyKey1,
     tokenSupplyKey2,
     tokenVoucherKey1,
@@ -187,7 +188,7 @@ contract('Voucher tests', async (accounts) => {
         'Correlation Id incorrect'
       );
 
-      //Check VocherKernel State
+      //Check VoucherKernel State
       const promise = await contractVoucherKernel.promises(promiseId1);
       assert.equal(promise.promiseId, promiseId1, 'Promise Id incorrect');
       assert.isTrue(promise.nonce.eq(constants.ONE), 'Nonce is incorrect');
