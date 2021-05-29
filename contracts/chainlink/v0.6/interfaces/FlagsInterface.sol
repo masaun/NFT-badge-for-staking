@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.6.0;
+pragma solidity 0.6.0;
 
 interface FlagsInterface {
   function getFlag(address) external view returns (bool);

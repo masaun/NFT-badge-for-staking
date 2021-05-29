@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Adapted from https://github.com/OpenZeppelin/openzeppelin-contracts/blob/97894a140d2a698e5a0f913648a8f56d62277a70/contracts/math/SignedSafeMath.sol
 
-pragma solidity ^0.6.0;
+pragma solidity 0.6.0;
 
 library CheckedMath {
 

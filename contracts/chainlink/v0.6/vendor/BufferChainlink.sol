@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.6.0;
+pragma solidity 0.6.0;
 
 /**
 * @dev A library for working with mutable byte buffers in Solidity.
