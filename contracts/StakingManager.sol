@@ -13,7 +13,7 @@ import { StakingNFTBadgeFor1Year } from "./StakingNFTBadgeFor1Year.sol";
  * @notice - Controller of rule for duration of SNX Staking: 3 months, 6 months, 1 year..
  * @notice - Set up conditions to create a NFT
  */
-contract RuleController {
+contract StakingManager {
 
     LPToken public lpToken;
     RewardToken public rewardToken;
