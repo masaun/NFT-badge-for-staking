@@ -5,9 +5,9 @@ import { LPToken } from "./LPToken.sol";
 import { RewardToken } from "./RewardToken.sol";
 import { StakingPool } from "./StakingPool.sol";
 
-import { StakingNFTBadgeFor3MonthsFactory } from "./StakingNFTBadgeFor3MonthsFactory.sol";
-import { StakingNFTBadgeFor6MonthsFactory } from "./StakingNFTBadgeFor6MonthsFactory.sol";
-import { StakingNFTBadgeFor1YearFactory } from "./StakingNFTBadgeFor1YearFactory.sol";
+import { StakingNFTBadgeFor3Months } from "./StakingNFTBadgeFor3Months.sol";
+import { StakingNFTBadgeFor6Months } from "./StakingNFTBadgeFor6Months.sol";
+import { StakingNFTBadgeFor1Year } from "./StakingNFTBadgeFor1Year.sol";
 
 /**
  * @notice - Controller of rule for duration of SNX Staking: 3 months, 6 months, 1 year..
@@ -19,24 +19,24 @@ contract RuleController {
     RewardToken public rewardToken;
     StakingPool public stakingPool;
 
-    StakingNFTBadgeFor3MonthsFactory public badgeFor3MonthsFactory;
-    StakingNFTBadgeFor6MonthsFactory public badgeFor6MonthsFactory;
-    StakingNFTBadgeFor1YearFactory public badgeFor1YearFactory;
+    StakingNFTBadgeFor3Months public badgeFor3Months;
+    StakingNFTBadgeFor6Months public badgeFor6Months;
+    StakingNFTBadgeFor1Year public badgeFor1Year;
 
     constructor(
         LPToken _lpToken,
         RewardToken _rewardToken,
         StakingPool _stakingPool,
-        StakingNFTBadgeFor3MonthsFactory _badgeFor3MonthsFactory, 
-        StakingNFTBadgeFor6MonthsFactory _badgeFor6MonthsFactory, 
-        StakingNFTBadgeFor1YearFactory _badgeFor1YearFactory
+        StakingNFTBadgeFor3Months _badgeFor3Months, 
+        StakingNFTBadgeFor6Months _badgeFor6Months, 
+        StakingNFTBadgeFor1Year _badgeFor1Year
     ) public {
         lpToken = _lpToken;
         rewardToken = _rewardToken;
         stakingPool = _stakingPool;
-        badgeFor3MonthsFactory = _badgeFor3MonthsFactory;
-        badgeFor6MonthsFactory = _badgeFor6MonthsFactory;
-        badgeFor1YearFactory = _badgeFor1YearFactory;
+        badgeFor3Months = _badgeFor3Months;
+        badgeFor6Months = _badgeFor6Months;
+        badgeFor1Year = _badgeFor1Year;
     }
 
     /**
@@ -51,7 +51,7 @@ contract RuleController {
         stakingPool.stake(stakeAmount);
 
         // Distribute NFT that represent stake for 3 months
-        badgeFor3MonthsFactory.createStakingNFTBadgeFor3Months(to, tokenURI);
+        badgeFor3Months.mintBadge(to, tokenURI);
     }
 
     /**
@@ -66,7 +66,7 @@ contract RuleController {
         stakingPool.stake(stakeAmount);
 
         // Distribute NFT that represent stake for 6 months
-        badgeFor6MonthsFactory.createStakingNFTBadgeFor6Months(to, tokenURI);
+        badgeFor6Months.mintBadge(to, tokenURI);
     }
 
     /**
@@ -81,7 +81,7 @@ contract RuleController {
         stakingPool.stake(stakeAmount);
 
         // Distribute NFT that represent stake for 1 year
-        badgeFor1YearFactory.createStakingNFTBadgeFor1Year(to, tokenURI);
+        badgeFor1Year.mintBadge(to, tokenURI);
     }
 
 }
