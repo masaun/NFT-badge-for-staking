@@ -8,12 +8,7 @@ contract StakingNFTBadgeFor3Months is ERC721 {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
 
-    constructor(
-        address to, 
-        string memory tokenURI
-    ) public ERC721("Synthetix Staking NFT Badge for 3 months", "SSNB-3M") {
-        mintBadge(to, tokenURI);  // First mint
-    }
+    constructor() public ERC721("Synthetix Staking NFT Badge for 3 months", "SSNB-3M") {}
 
     function mintBadge(address to, string memory tokenURI) public returns (uint256) {
         _tokenIds.increment();
