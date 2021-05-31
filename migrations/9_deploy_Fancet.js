@@ -16,6 +16,6 @@ module.exports = async function(deployer) {
 
     /// Deposit each tokens into the Fancet contract
     const amount = 1e8 * 1e18  /// 1 milion (all amount of total supply)
-    await lpToken.transfer(FANCET, amount)
-    await rewardToken.transfer(FANCET, amount)    
+    await lpToken.transfer(FANCET, amount, { from: deployer })
+    await rewardToken.transfer(FANCET, amount, { from: deployer })    
 }
