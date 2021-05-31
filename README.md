@@ -87,10 +87,20 @@ https://infura.io/
 <br>
 
 - ③ Execute script on `Polygon (Matic) mumbai testnet`
-(※ This script include deployment of smart contracts on Polygon)
+(※ This script uses deployed-contract addresses on Polygon mumbai)
 ```
-npm run script:Something
+npm run script:StakingManager
 ```
+
+## 【Deployed-contract addresses】
+- LP Token: 0xCB9e421b1bF2f20E3EEbd3d16A8F44D50B7f56ad
+- Reward Token: 0xD68cE6B14d4E5f8ed28F6eb9b92A63f48FFDc0a7
+- StakingNFTBadgeFor3Months: 0x19bC3A74BB8de091fE4a76af093b031395cE17f2
+- StakingNFTBadgeFor6Months: 0xe5273E5D1bf82e60125968B6C9c3476A70E1FCaF
+- StakingNFTBadgeFor1Year: 0xBF3463C0def89691d765aB95d456402463310Ef3
+- StakingPool: 0xB8faeCcdF3Ce5Dc470720B212b7056113dbA386f
+- StakingManager: 0x404735352a45fc40fb1d10316e037219e1ADe25B
+- Fancet === 0xB786Ee2f65C6fec7568CA565Be9958713Ac24C18
 
 <br>
 
