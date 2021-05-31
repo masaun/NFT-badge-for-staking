@@ -38,15 +38,6 @@
 &nbsp;
 
 ***
-## 【Setup】for Hardhat
-```
-npm run hardhat:node  (<--Instead of ganache-cli)
-npm run hardhat-test:boson-x-chain
-
-npm run hardhat-test:boson
-```
-
-
 <br>
 
 ## 【Setup】
@@ -106,7 +97,7 @@ npm run script:StakingManager
 
 ## 【Demo】
 - Demo video that script above is executed  
-
+https://youtu.be/tV8vjcEGEPQ 
 
 
 <br>
