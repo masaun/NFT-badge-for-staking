@@ -219,10 +219,12 @@ async function checkStatusAfterStake() {
     console.log('=== LP Token balance of user ===', fromWei(LPTokenBalance))
     console.log('=== Reward Token balance of user ===', fromWei(RewardTokenBalance))
 
-    const tokenId = 1
-    const owner1 = await badgeFor3Months.ownerOf(tokenId)
-    const owner2 = await badgeFor6Months.ownerOf(tokenId)
-    const owner3 = await badgeFor1Year.ownerOf(tokenId)
+    const tokenId1 = await badgeFor3Months.getCurrentTokenId()
+    const tokenId2 = await badgeFor6Months.getCurrentTokenId()
+    const tokenId3 = await badgeFor1Year.getCurrentTokenId()
+    const owner1 = await badgeFor3Months.ownerOf(tokenId1)
+    const owner2 = await badgeFor6Months.ownerOf(tokenId2)
+    const owner3 = await badgeFor1Year.ownerOf(tokenId3)
     console.log('=== Owner of NFT badge for 3 months ===', owner1)
     console.log('=== Owner of NFT badge for 6 months ===', owner2)
     console.log('=== Owner of NFT badge for 1 year ===', owner3)
