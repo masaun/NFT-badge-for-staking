@@ -2,10 +2,11 @@ module.exports = {
     "Mainnet": {
     },
     "Polygon Mumbai": {
-        "StakingNFTBadgeFor3Months": "0xFb808B754DF944E8Ff3d91F20E7029E8500Ec5b9",
-        "StakingNFTBadgeFor6Months": "0xe1172C5c18E178097Eba28639154bbdbB95fB578",
-        "StakingNFTBadgeFor1Year": "0x1c67Ca933385E4B3862F86cb9BcFDb44bA11D723",
-        "StakingPool": "0xcf71D1Ea5CBcF2709c5BC4e4dA91AbD647653E78",
-        "StakingManager": "0x205356D5A173220195FD643e98CaBdab97120579"
+        "StakingNFTBadgeFor3Months": "0xAC8cB00E685300c692D5E2c2e5D5D95dAD9D0c05",
+        "StakingNFTBadgeFor6Months": "0x486E533fF7A2A759e804f90F694Ad43B1f6DF9d5",
+        "StakingNFTBadgeFor1Year": "0x5a7965a610B963710D90DD9cF0a02cdBfB026bfb",
+        "StakingPool": "0x2128d774d9B3578CAA0D8AB9fE42799e629624d0",
+        "StakingManager": "0x5838A26CCbc9C8B915955625353FCaB61288b311",
+        "Fancet": "0xdF7AbcD8B9757a49D744503Ec98EB4F282a77F8a"
     }
 }
