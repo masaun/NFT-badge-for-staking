@@ -8,20 +8,19 @@ contract StakingNFTBadgeFor6Months is ERC721 {
     using Counters for Counters.Counter;
     Counters.Counter private _tokenIds;
 
-    constructor(
-        address to, 
-        string memory tokenURI
-    ) public ERC721("Synthetix Staking NFT Badge for 6 months", "SSNB-6M") {
-        mintBadge(to, tokenURI);  // First mint
-    }
+    constructor() public ERC721("Staking NFT Badge for 6 months", "SNB-6M") {}
 
-    function mintBadge(address to, string memory tokenURI) public returns (uint256) {
+    function mintBadge(address to) public returns (uint256) {
         _tokenIds.increment();
 
         uint256 newBadgeId = _tokenIds.current();
         _mint(to, newBadgeId);
-        _setTokenURI(newBadgeId, tokenURI);
+        //_setTokenURI(newBadgeId, tokenURI);
 
         return newBadgeId;
+    }
+
+    function getCurrentTokenId() public view returns (uint _currentTokenId) {
+        return _tokenIds._value;
     }
 }
