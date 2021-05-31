@@ -10,8 +10,7 @@ import { StakingNFTBadgeFor6Months } from "./StakingNFTBadgeFor6Months.sol";
 import { StakingNFTBadgeFor1Year } from "./StakingNFTBadgeFor1Year.sol";
 
 /**
- * @notice - Controller of rule for duration of SNX Staking: 3 months, 6 months, 1 year..
- * @notice - Set up conditions to create a NFT
+ * @notice - This is the Staking Manager contract
  */
 contract StakingManager {
 
@@ -44,10 +43,10 @@ contract StakingManager {
     }
 
     /**
-     * @notice - Stake SNX tokens into Synthetix
+     * @notice - Stake LP tokens into the Staking Pool
      * @notice - Staking period is for 3 months
      */
-    function stakeFor3Months(string memory tokenURI, uint stakeAmount) public payable returns (bool) {
+    function stakeFor3Months(uint stakeAmount) public payable returns (bool) {
         // Staked-token (LP tokens) is transferred from msg.sender to this contract
         lpToken.transferFrom(msg.sender, address(this), stakeAmount);
 
@@ -56,14 +55,14 @@ contract StakingManager {
         stakingPool.stake(stakeAmount);
 
         // Distribute NFT that represent stake for 3 months
-        badgeFor3Months.mintBadge(msg.sender, tokenURI);
+        badgeFor3Months.mintBadge(msg.sender);
     }
 
     /**
-     * @notice - Stake SNX tokens into Synthetix
+     * @notice - Stake LP tokens into the Staking Pool
      * @notice - Staking period is for 6 months
      */
-    function stakeFor6Months(string memory tokenURI, uint stakeAmount) public returns (bool) {
+    function stakeFor6Months(uint stakeAmount) public returns (bool) {
         // Staked-token (LP tokens) is transferred from msg.sender to this contract
         lpToken.transferFrom(msg.sender, address(this), stakeAmount);
 
@@ -72,14 +71,14 @@ contract StakingManager {
         stakingPool.stake(stakeAmount);
 
         // Distribute NFT that represent stake for 6 months
-        badgeFor6Months.mintBadge(msg.sender, tokenURI);
+        badgeFor6Months.mintBadge(msg.sender);
     }
 
     /**
-     * @notice - Stake SNX tokens into Synthetix
+     * @notice - Stake LP tokens into the Staking Pool
      * @notice - Staking period is for 1 year
      */
-    function stakeFor1Year(string memory tokenURI, uint stakeAmount) public returns (bool) {
+    function stakeFor1Year(uint stakeAmount) public returns (bool) {
         // Staked-token (LP tokens) is transferred from msg.sender to this contract
         lpToken.transferFrom(msg.sender, address(this), stakeAmount);
 
@@ -88,7 +87,14 @@ contract StakingManager {
         stakingPool.stake(stakeAmount);
 
         // Distribute NFT that represent stake for 1 year
-        badgeFor1Year.mintBadge(msg.sender, tokenURI);
+        badgeFor1Year.mintBadge(msg.sender);
     }
 
+    /**
+     * @notice - unstake LP tokens
+     */
+    function unstake(uint unstakeAmount) public returns (bool) {
+        stakingPool.unstake(unstakeAmount);
+        lpToken.transfer(msg.sender, unstakeAmount);
+    }
 }
