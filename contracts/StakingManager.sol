@@ -43,7 +43,7 @@ contract StakingManager {
      * @notice - Stake SNX tokens into Synthetix
      * @notice - Staking period is for 3 months
      */
-    function stakeFor3Months(address to, string memory tokenURI, uint stakeAmount) public payable returns (bool) {
+    function stakeFor3Months(string memory tokenURI, uint stakeAmount) public payable returns (bool) {
         // Staked-token (LP tokens) is transferred from msg.sender to this contract
         lpToken.transferFrom(msg.sender, address(this), stakeAmount);
 
@@ -51,14 +51,14 @@ contract StakingManager {
         stakingPool.stake(stakeAmount);
 
         // Distribute NFT that represent stake for 3 months
-        badgeFor3Months.mintBadge(to, tokenURI);
+        badgeFor3Months.mintBadge(msg.sender, tokenURI);
     }
 
     /**
      * @notice - Stake SNX tokens into Synthetix
      * @notice - Staking period is for 6 months
      */
-    function stakeFor6Months(address to, string memory tokenURI, uint stakeAmount) public returns (bool) {
+    function stakeFor6Months(string memory tokenURI, uint stakeAmount) public returns (bool) {
         // Staked-token (LP tokens) is transferred from msg.sender to this contract
         lpToken.transferFrom(msg.sender, address(this), stakeAmount);
 
@@ -66,14 +66,14 @@ contract StakingManager {
         stakingPool.stake(stakeAmount);
 
         // Distribute NFT that represent stake for 6 months
-        badgeFor6Months.mintBadge(to, tokenURI);
+        badgeFor6Months.mintBadge(msg.sender, tokenURI);
     }
 
     /**
      * @notice - Stake SNX tokens into Synthetix
      * @notice - Staking period is for 1 year
      */
-    function stakeFor1Year(address to, string memory tokenURI, uint stakeAmount) public returns (bool) {
+    function stakeFor1Year(string memory tokenURI, uint stakeAmount) public returns (bool) {
         // Staked-token (LP tokens) is transferred from msg.sender to this contract
         lpToken.transferFrom(msg.sender, address(this), stakeAmount);
 
@@ -81,7 +81,7 @@ contract StakingManager {
         stakingPool.stake(stakeAmount);
 
         // Distribute NFT that represent stake for 1 year
-        badgeFor1Year.mintBadge(to, tokenURI);
+        badgeFor1Year.mintBadge(msg.sender, tokenURI);
     }
 
 }

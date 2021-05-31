@@ -74,8 +74,9 @@ async function main() {
     await SetupSmartContracts()
 
     console.log("\n------------- Workflow of the StakingManager contract -------------")
-
-
+    await stakeFor3Months()
+    await stakeFor6Months()
+    await stakeFor1Year()
 }
 
 
@@ -152,11 +153,32 @@ async function SetupSmartContracts() {
 
 
 ///--------------------------------------------
-/// Methods
+/// Methods for workflow
 ///--------------------------------------------
-async function something() {}
+async function stakeFor3Months() {
+    const tokenURI = "https://ipfs.fleek.co/ipfs/QmdSMxjdETpEEDgG1zABTUQjDr3LUi8KXi3ycWUgcmcPRZ"
+    const stakeAmount = toWei('0.1')
+    let txReceipt = await stakingManager.stakeFor3Months(tokenURI, stakeAmount, { from: deployer })
 
-async function something() {}
+    console.log("User should receive a NFT that represent staking for 3 months")
+}
+
+async function stakeFor6Months() {
+    const tokenURI = "https://ipfs.fleek.co/ipfs/QmdSMxjdETpEEDgG1zABTUQjDr3LUi8KXi3ycWUgcmcPRZ"
+    const stakeAmount = toWei('0.1')
+    let txReceipt = await stakingManager.stakeFor6Months(tokenURI, stakeAmount, { from: deployer })
+
+    console.log("User should receive a NFT that represent staking for 3 months")
+}
+
+async function stakeFor1Year() {
+    const tokenURI = "https://ipfs.fleek.co/ipfs/QmdSMxjdETpEEDgG1zABTUQjDr3LUi8KXi3ycWUgcmcPRZ"
+    const stakeAmount = toWei('0.1')
+    let txReceipt = await stakingManager.stakeFor1Year(tokenURI, stakeAmount, { from: deployer })
+
+    console.log("User should receive a NFT that represent staking for 3 months")    
+}
+
 
 
 
