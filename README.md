@@ -87,7 +87,7 @@ npm run script:StakingManager
 <br>
 
 ## 【Deployed-contract addresses】
-- Smart contract addresses below are deployed on Polygon mumbai testnet: 
+- Smart contract addresses below are deployed on `Polygon mumbai` testnet: 
   - LP Token: 0xCB9e421b1bF2f20E3EEbd3d16A8F44D50B7f56ad
   - Reward Token: 0xD68cE6B14d4E5f8ed28F6eb9b92A63f48FFDc0a7
   - StakingNFTBadgeFor3Months: 0x19bC3A74BB8de091fE4a76af093b031395cE17f2
