@@ -19,4 +19,8 @@ contract StakingNFTBadgeFor6Months is ERC721 {
 
         return newBadgeId;
     }
+
+    function getCurrentTokenId() public returns (uint _currentTokenId) {
+        return _tokenIds;
+    }
 }
