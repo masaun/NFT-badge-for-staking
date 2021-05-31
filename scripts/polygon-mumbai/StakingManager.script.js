@@ -18,7 +18,7 @@ const StakingNFTBadgeFor6Months = artifacts.require("StakingNFTBadgeFor6Months")
 const StakingNFTBadgeFor1Year = artifacts.require("StakingNFTBadgeFor1Year")
 const StakingPool = artifacts.require("StakingPool")
 const StakingManager = artifacts.require("StakingManager")
-
+const Fancet = artifacts.require("Fancet")
 
 /// Deployed-contract addresses on Polygon testnet
 let LP_TOKEN = tokenAddressList["Polygon Mumbai"]["LPToken"]
@@ -28,6 +28,7 @@ let BADGE_FOR_6_MONTHS = contractAddressList["Polygon Mumbai"]["StakingNFTBadgeF
 let BADGE_FOR_1_YEAR = contractAddressList["Polygon Mumbai"]["StakingNFTBadgeFor1Year"]
 let STAKING_POOL = contractAddressList["Polygon Mumbai"]["StakingPool"]
 let STAKING_MANAGER = contractAddressList["Polygon Mumbai"]["StakingManager"]
+let FANCET = contractAddressList["Polygon Mumbai"]["Fancet"]
 
 /// Variable to assign a Geyser contract address
 // let LP_TOKEN
@@ -144,6 +145,12 @@ async function SetupSmartContracts() {
     stakingManager = await StakingManager.at(STAKING_MANAGER)
     //STAKING_MANAGER = stakingManager.address
 
+    //console.log("Deploy the Fancet contract instance")
+    console.log("Create the Fancet contract instance")
+    //fancet = await Fancet.new(LP_TOKEN, REWARD_TOKEN, { from: deployer })
+    fancet = await Fancet.at(FANCET)
+    //FANCET = fancet.address
+
     /// Logs (each deployed-contract addresses)
     console.log('=== LP_TOKEN ===', LP_TOKEN)    
     console.log('=== REWARD_TOKEN ===', REWARD_TOKEN)
@@ -152,6 +159,7 @@ async function SetupSmartContracts() {
     console.log('=== BADGE_FOR_1_YEAR ===', BADGE_FOR_1_YEAR)
     console.log('=== STAKING_POOL ===', STAKING_POOL)
     console.log('=== STAKING_MANAGER ===', STAKING_MANAGER)
+    console.log('=== FANCET ===', FANCET)
 }
 
 async function checkStatusBefore() {
