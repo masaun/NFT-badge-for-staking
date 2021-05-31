@@ -158,7 +158,9 @@ async function SetupSmartContracts() {
 async function stakeFor3Months() {
     const tokenURI = "https://ipfs.fleek.co/ipfs/QmdSMxjdETpEEDgG1zABTUQjDr3LUi8KXi3ycWUgcmcPRZ"
     const stakeAmount = toWei('0.1')
-    let txReceipt = await stakingManager.stakeFor3Months(tokenURI, stakeAmount, { from: deployer })
+
+    let txReceipt1 = await lpToken.approve(STAKING_MANAGER, stakeAmount, { from: deployer })
+    let txReceipt2 = await stakingManager.stakeFor3Months(tokenURI, stakeAmount, { from: deployer })
 
     console.log("User should receive a NFT that represent staking for 3 months")
 }
@@ -166,7 +168,9 @@ async function stakeFor3Months() {
 async function stakeFor6Months() {
     const tokenURI = "https://ipfs.fleek.co/ipfs/QmdSMxjdETpEEDgG1zABTUQjDr3LUi8KXi3ycWUgcmcPRZ"
     const stakeAmount = toWei('0.1')
-    let txReceipt = await stakingManager.stakeFor6Months(tokenURI, stakeAmount, { from: deployer })
+
+    let txReceipt1 = await lpToken.approve(STAKING_MANAGER, stakeAmount, { from: deployer })
+    let txReceipt2 = await stakingManager.stakeFor6Months(tokenURI, stakeAmount, { from: deployer })
 
     console.log("User should receive a NFT that represent staking for 3 months")
 }
@@ -174,7 +178,9 @@ async function stakeFor6Months() {
 async function stakeFor1Year() {
     const tokenURI = "https://ipfs.fleek.co/ipfs/QmdSMxjdETpEEDgG1zABTUQjDr3LUi8KXi3ycWUgcmcPRZ"
     const stakeAmount = toWei('0.1')
-    let txReceipt = await stakingManager.stakeFor1Year(tokenURI, stakeAmount, { from: deployer })
+
+    let txReceipt1 = await lpToken.approve(STAKING_MANAGER, stakeAmount, { from: deployer })
+    let txReceipt2 = await stakingManager.stakeFor1Year(tokenURI, stakeAmount, { from: deployer })
 
     console.log("User should receive a NFT that represent staking for 3 months")    
 }
