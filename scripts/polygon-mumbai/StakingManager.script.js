@@ -73,6 +73,9 @@ async function main() {
     console.log("\n------------- Setup smart contracts on Polygon mumbai testnet -------------")
     await SetupSmartContracts()
 
+    console.log("\n------------- Check status before workflow is started -------------")
+    await checkStatusBefore()
+
     console.log("\n------------- Workflow of the StakingManager contract -------------")
     await stakeFor3Months()
     await stakeFor6Months()
@@ -151,6 +154,13 @@ async function SetupSmartContracts() {
     console.log('=== STAKING_MANAGER ===', STAKING_MANAGER)
 }
 
+async function checkStatusBefore() {
+    LPTokenBalance = await lpToken.balanceOf(deployer)
+    RewardTokenBalance = await rewardToken.balanceOf(deployer)
+    console.log('=== LP Token balance of deployer ===', fromWei(LPTokenBalance))
+    console.log('=== Reward Token balance of deployer ===', fromWei(RewardTokenBalance))
+}
+
 
 ///--------------------------------------------
 /// Methods for workflow
@@ -172,7 +182,7 @@ async function stakeFor6Months() {
     let txReceipt1 = await lpToken.approve(STAKING_MANAGER, stakeAmount, { from: deployer })
     let txReceipt2 = await stakingManager.stakeFor6Months(tokenURI, stakeAmount, { from: deployer })
 
-    console.log("User should receive a NFT that represent staking for 3 months")
+    console.log("User should receive a NFT that represent staking for 6 months")
 }
 
 async function stakeFor1Year() {
@@ -182,7 +192,7 @@ async function stakeFor1Year() {
     let txReceipt1 = await lpToken.approve(STAKING_MANAGER, stakeAmount, { from: deployer })
     let txReceipt2 = await stakingManager.stakeFor1Year(tokenURI, stakeAmount, { from: deployer })
 
-    console.log("User should receive a NFT that represent staking for 3 months")    
+    console.log("User should receive a NFT that represent staking for 1 year")    
 }
 
 
