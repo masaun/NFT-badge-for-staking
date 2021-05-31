@@ -23,6 +23,8 @@ contract StakingManager {
     StakingNFTBadgeFor6Months public badgeFor6Months;
     StakingNFTBadgeFor1Year public badgeFor1Year;
 
+    address STAKING_POOL;
+
     constructor(
         LPToken _lpToken,
         RewardToken _rewardToken,
@@ -37,6 +39,8 @@ contract StakingManager {
         badgeFor3Months = _badgeFor3Months;
         badgeFor6Months = _badgeFor6Months;
         badgeFor1Year = _badgeFor1Year;
+
+        STAKING_POOL = address(stakingPool);
     }
 
     /**
@@ -48,6 +52,7 @@ contract StakingManager {
         lpToken.transferFrom(msg.sender, address(this), stakeAmount);
 
         // Stake LP tokens into the StakingPool contract
+        lpToken.approve(STAKING_POOL, stakeAmount);
         stakingPool.stake(stakeAmount);
 
         // Distribute NFT that represent stake for 3 months
@@ -63,6 +68,7 @@ contract StakingManager {
         lpToken.transferFrom(msg.sender, address(this), stakeAmount);
 
         // Stake LP tokens into the StakingPool contract
+        lpToken.approve(STAKING_POOL, stakeAmount);
         stakingPool.stake(stakeAmount);
 
         // Distribute NFT that represent stake for 6 months
@@ -78,6 +84,7 @@ contract StakingManager {
         lpToken.transferFrom(msg.sender, address(this), stakeAmount);
 
         // Stake LP tokens into the StakingPool contract
+        lpToken.approve(STAKING_POOL, stakeAmount);
         stakingPool.stake(stakeAmount);
 
         // Distribute NFT that represent stake for 1 year

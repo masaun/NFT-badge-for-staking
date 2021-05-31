@@ -96,13 +96,13 @@ async function setWalletAddress() {
 }
 
 async function SetupSmartContracts() {
-    console.log("Deploy the LP Token (mock) contract instance")
+    console.log("Deploy the LP Token contract instance + A deployer receive 1000000 LP Tokens as initial supply")
     //console.log("Create the LP Token (mock) contract instance")
     lpToken = await LPToken.new({ from: deployer })
     //lpToken = await LPToken.at(LP_TOKEN)
     LP_TOKEN = lpToken.address
 
-    console.log("Deploy the Reward Token (mock) contract instance")
+    console.log("Deploy the Reward Token contract instance + A deployer receive 1000000 Reward Tokens as initial supply")
     //console.log("Create the Reward Token (mock) contract instance")
     rewardToken = await RewardToken.new({ from: deployer })
     //rewardToken = await RewardToken.at(REWARD_TOKEN)
