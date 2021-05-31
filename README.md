@@ -9,6 +9,12 @@
     - A staker can not unstake until chosen-period. 
       (When a staker try to unstake, smart contract check whether staking period is passed or not by a NFT which a staker has)
 
+<br>
+
+- This smart contract has been deployed on Polygon (mumbai).
+  - By deploying on Polygon, a staker can reduce cost for each transactions and get a higher speed transaction.
+
+
 &nbsp;
 
 ***
