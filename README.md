@@ -3,9 +3,9 @@
 ***
 ## 【Introduction of the NFT Badge for staking】
 - This repo is the smart contract for NFT Badge for staking.
-  - This smart contract give a staker a NFT that represents staking period (= `vesting period` ) which a staker chose.
+  - This smart contract give a staker a NFT depends on staking period (= `vesting period` ) which a staker chose.
     - Staking period that a staker can choose are 3 options: 3 months, 6 months, 1 year)
-    - Each a NFT represents staking period (= `vesting period` ) which a staker chose.
+    - Each NFT works as a `proof of deposit` and represents staking period (= `vesting period` ) which a staker chose.
     - A staker can not unstake until chosen-period. 
       (When a staker try to unstake, smart contract check whether staking period is passed or not by a NFT which a staker has)
 
