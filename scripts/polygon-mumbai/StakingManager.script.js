@@ -49,7 +49,8 @@ let stakingPool
 let stakingManager
 
 /// Acccounts
-let deployer
+let user
+//let deployer
 
 
 /***
@@ -68,7 +69,7 @@ module.exports = function(callback) {
 };
 
 async function main() {
-    console.log("\n------------- Set wallet addresses -------------")
+    console.log("\n------------- Set a wallet address -------------")
     await setWalletAddress()
 
     console.log("\n------------- Setup smart contracts on Polygon mumbai testnet -------------")
@@ -84,6 +85,9 @@ async function main() {
     await stakeFor3Months()
     await stakeFor6Months()
     await stakeFor1Year()
+
+    console.log("\n------------- Check status after a user staked -------------")
+    await checkStatusAfterStake()
 }
 
 
@@ -91,12 +95,11 @@ async function main() {
 /// Preparation
 ///-----------------------------------------------
 async function setWalletAddress() {
-    console.log("Wallet address should be assigned into deployer")
-    deployer = process.env.DEPLOYER_ADDRESS
-    //deployer = process.env.EXECUTOR_ADDRESS
+    user = process.env.DEPLOYER_ADDRESS
+    //deployer = process.env.DEPLOYER_ADDRESS
 
     /// [Log]
-    console.log('=== deployer ===', deployer)
+    console.log('=== user ===', user)
 }
 
 async function setupSmartContracts() {
@@ -167,15 +170,15 @@ async function setupSmartContracts() {
 
 async function receiveTokensFromFancet() {
     console.log("User should receive 1000 LPTokens and 1000 RewardTokens")
-    txReceipt1 = await fancet.transferLPToken({ from: deployer })
-    txReceipt2 = await fancet.transferRewardToken({ from: deployer })
+    txReceipt1 = await fancet.transferLPToken({ from: user })
+    txReceipt2 = await fancet.transferRewardToken({ from: user })
 }
 
 async function checkStatusBefore() {
-    LPTokenBalance = await lpToken.balanceOf(deployer)
-    RewardTokenBalance = await rewardToken.balanceOf(deployer)
-    console.log('=== LP Token balance of deployer ===', fromWei(LPTokenBalance))
-    console.log('=== Reward Token balance of deployer ===', fromWei(RewardTokenBalance))
+    LPTokenBalance = await lpToken.balanceOf(user)
+    RewardTokenBalance = await rewardToken.balanceOf(user)
+    console.log('=== LP Token balance of user ===', fromWei(LPTokenBalance))
+    console.log('=== Reward Token balance of user ===', fromWei(RewardTokenBalance))
 }
 
 
@@ -186,8 +189,8 @@ async function stakeFor3Months() {
     const tokenURI = "https://ipfs.fleek.co/ipfs/QmdSMxjdETpEEDgG1zABTUQjDr3LUi8KXi3ycWUgcmcPRZ"
     const stakeAmount = toWei('0.1')
 
-    let txReceipt1 = await lpToken.approve(STAKING_MANAGER, stakeAmount, { from: deployer })
-    let txReceipt2 = await stakingManager.stakeFor3Months(tokenURI, stakeAmount, { from: deployer })
+    let txReceipt1 = await lpToken.approve(STAKING_MANAGER, stakeAmount, { from: user })
+    let txReceipt2 = await stakingManager.stakeFor3Months(tokenURI, stakeAmount, { from: user })
 
     console.log("User should receive a NFT that represent staking for 3 months")
 }
@@ -196,8 +199,8 @@ async function stakeFor6Months() {
     const tokenURI = "https://ipfs.fleek.co/ipfs/QmdSMxjdETpEEDgG1zABTUQjDr3LUi8KXi3ycWUgcmcPRZ"
     const stakeAmount = toWei('0.1')
 
-    let txReceipt1 = await lpToken.approve(STAKING_MANAGER, stakeAmount, { from: deployer })
-    let txReceipt2 = await stakingManager.stakeFor6Months(tokenURI, stakeAmount, { from: deployer })
+    let txReceipt1 = await lpToken.approve(STAKING_MANAGER, stakeAmount, { from: user })
+    let txReceipt2 = await stakingManager.stakeFor6Months(tokenURI, stakeAmount, { from: user })
 
     console.log("User should receive a NFT that represent staking for 6 months")
 }
@@ -206,17 +209,17 @@ async function stakeFor1Year() {
     const tokenURI = "https://ipfs.fleek.co/ipfs/QmdSMxjdETpEEDgG1zABTUQjDr3LUi8KXi3ycWUgcmcPRZ"
     const stakeAmount = toWei('0.1')
 
-    let txReceipt1 = await lpToken.approve(STAKING_MANAGER, stakeAmount, { from: deployer })
-    let txReceipt2 = await stakingManager.stakeFor1Year(tokenURI, stakeAmount, { from: deployer })
+    let txReceipt1 = await lpToken.approve(STAKING_MANAGER, stakeAmount, { from: user })
+    let txReceipt2 = await stakingManager.stakeFor1Year(tokenURI, stakeAmount, { from: user })
 
     console.log("User should receive a NFT that represent staking for 1 year")    
 }
 
 async function checkStatusAfterStake() {
-    LPTokenBalance = await lpToken.balanceOf(deployer)
-    RewardTokenBalance = await rewardToken.balanceOf(deployer)
-    console.log('=== LP Token balance of deployer ===', fromWei(LPTokenBalance))
-    console.log('=== Reward Token balance of deployer ===', fromWei(RewardTokenBalance))
+    LPTokenBalance = await lpToken.balanceOf(user)
+    RewardTokenBalance = await rewardToken.balanceOf(user)
+    console.log('=== LP Token balance of user ===', fromWei(LPTokenBalance))
+    console.log('=== Reward Token balance of user ===', fromWei(RewardTokenBalance))
 
     const tokenId = 1
     const owner1 = await badgeFor3Months.ownerOf(tokenId)
