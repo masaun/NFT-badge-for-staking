@@ -20,7 +20,8 @@
 ***
 
 ## 【Workflow】
-- Diagram of workflow
+- Diagram of workflow ()
+![【Diagram】NFT Badge for staking](https://user-images.githubusercontent.com/19357502/120177973-ef667a00-c243-11eb-883d-f2720ff85818.jpg)
 
 &nbsp;
 
