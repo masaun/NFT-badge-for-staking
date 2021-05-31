@@ -169,9 +169,8 @@ async function setupSmartContracts() {
 }
 
 async function receiveTokensFromFancet() {
-    console.log("User should receive 1000 LPTokens and 1000 RewardTokens")
+    console.log("User should receive 1000 LPTokens")
     txReceipt1 = await fancet.transferLPToken({ from: user })
-    //txReceipt2 = await fancet.transferRewardToken({ from: user })
 }
 
 async function checkStatusBefore() {
