@@ -2,7 +2,7 @@ module.exports = {
     "Mainnet": {
     },
     "Polygon Mumbai": {
-        "LPToken": "0x7544604B7675ffF98618A15908B8b59d036Ab3a4",
-        "RewardToken": "0xaeF8f3666df6d9744Ab6598eB4314714F8Bd5892"
+        "LPToken": "0xCB9e421b1bF2f20E3EEbd3d16A8F44D50B7f56ad",
+        "RewardToken": "0xD68cE6B14d4E5f8ed28F6eb9b92A63f48FFDc0a7"
     }
 }

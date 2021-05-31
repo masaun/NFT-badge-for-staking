@@ -1,7 +1,7 @@
-# 0xHack - Chainlink on Polygon
+# NFT Badge For Staking
 
 ***
-## 【Introduction of the 0xHack - Chainlink on Polygon】
+## 【Introduction of the NFT Badge For Staking】
 - This repo is the smart contract that
 
 &nbsp;
@@ -85,7 +85,7 @@ npm run script:Something
 
 ## 【Demo】
 - Demo video that script above is executed  
-https://youtu.be/nwyNV8b0XyI
+
 
 
 <br>
