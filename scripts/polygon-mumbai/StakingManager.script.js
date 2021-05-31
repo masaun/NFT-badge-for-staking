@@ -193,6 +193,7 @@ async function stakeFor3Months() {
     let txReceipt2 = await stakingManager.stakeFor3Months(stakeAmount, { from: user })
 
     console.log("User should receive a NFT that represent staking for 3 months")
+    console.log("Tx hash of stakeFor3Months(): ", txReceipt2.tx)
 }
 
 async function stakeFor6Months() {
@@ -201,7 +202,8 @@ async function stakeFor6Months() {
     let txReceipt1 = await lpToken.approve(STAKING_MANAGER, stakeAmount, { from: user })
     let txReceipt2 = await stakingManager.stakeFor6Months(stakeAmount, { from: user })
 
-    console.log("User should receive a NFT that represent staking for 6 months")
+    console.log("\n User should receive a NFT that represent staking for 6 months")
+    console.log("Tx hash of stakeFor6Months(): ", txReceipt2.tx)
 }
 
 async function stakeFor1Year() {
@@ -210,7 +212,8 @@ async function stakeFor1Year() {
     let txReceipt1 = await lpToken.approve(STAKING_MANAGER, stakeAmount, { from: user })
     let txReceipt2 = await stakingManager.stakeFor1Year(stakeAmount, { from: user })
 
-    console.log("User should receive a NFT that represent staking for 1 year")    
+    console.log("\n User should receive a NFT that represent staking for 1 year")    
+    console.log("Tx hash of stakeFor1Year(): ", txReceipt2.tx)
 }
 
 async function checkStatusAfterStake() {
@@ -233,6 +236,7 @@ async function checkStatusAfterStake() {
 async function unstakeLPs() {
     const unstakeAmount = toWei('0.1')
     let txReceipt = await stakingManager.unstake(unstakeAmount, { from: user })
+    console.log("Tx hash of unstake(): ", txReceipt.tx)
 }
 
 

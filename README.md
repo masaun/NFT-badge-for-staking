@@ -72,7 +72,7 @@ https://infura.io/
 
 <br>
 
-- ③ In advance, Please check `MATIC token balance` of `executor's wallet address` .
+- ③ In advance, Please check `MATIC token balance` of `executor's (user's) wallet address` .
   - Idealy, MATIC tokens balance is more than `1 MATIC` .
   - Matic fancet: https://faucet.matic.network/ (Please select Mumbai network)
 
@@ -83,6 +83,8 @@ https://infura.io/
 ```
 npm run script:StakingManager
 ```
+
+<br>
 
 ## 【Deployed-contract addresses】
 - Smart contract addresses below are deployed on Polygon mumbai testnet: 
