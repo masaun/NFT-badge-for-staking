@@ -89,7 +89,7 @@ async function main() {
     await checkStatusAfterStake()
 
     console.log("\n------------- unstake()  -------------")
-    await unstake()
+    await unstakeLPs()
 }
 
 
@@ -225,12 +225,12 @@ async function checkStatusAfterStake() {
     const owner1 = await badgeFor3Months.ownerOf(tokenId1)
     const owner2 = await badgeFor6Months.ownerOf(tokenId2)
     const owner3 = await badgeFor1Year.ownerOf(tokenId3)
-    console.log('=== Owner of NFT badge for 3 months ===', owner1)
-    console.log('=== Owner of NFT badge for 6 months ===', owner2)
-    console.log('=== Owner of NFT badge for 1 year ===', owner3)
+    console.log(`=== Owner of NFT badge for 3 months (token ID: ${ tokenId1 }) ===`, owner1)
+    console.log(`=== Owner of NFT badge for 6 months (token ID: ${ tokenId2 }) ===`, owner2)
+    console.log(`=== Owner of NFT badge for 1 year (token ID: ${ tokenId3 }) ===`, owner3)
 }
 
-async function unstake() {
+async function unstakeLPs() {
     const unstakeAmount = toWei('0.1')
     let txReceipt = await stakingManager.unstake(unstakeAmount, { from: user })
 }
