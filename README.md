@@ -101,7 +101,7 @@ npm run script:StakingManager
 
 ## 【Demo】
 - Demo video that script above is executed  
-https://youtu.be/tV8vjcEGEPQ 
+https://youtu.be/0APV4cNICDc
 
 
 <br>
