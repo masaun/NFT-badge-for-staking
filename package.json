@@ -8,16 +8,11 @@
   },
   "scripts": {
     "test": "truffle test ./test/test-local/* --network local",
-    "test:Boson-General-Scenario": "truffle test ./test/test-local/Boson-general-scenario.test.js --network local",
-    "test:boson-scenario": "truffle test ./test/test-local/boson-scenario.test.js --network local",
-    "script:boson-scenario": "truffle exec ./scripts/polygon-mumbai/boson-scenario.script.js --network polygon_mumbai",
+    "script:StakingManager": "truffle exec ./scripts/polygon-mumbai/StakingManager.script.js --network polygon_mumbai",
     "compile:local": "truffle compile --reset --network local",
     "migrate:local": "truffle migrate --reset --network local",
     "compile:polygon_mumbai": "truffle compile --reset --network polygon_mumbai",
-    "migrate:polygon_mumbai": "truffle migrate --reset --network polygon_mumbai",
-    "hardhat:node": "npx hardhat node",
-    "hardhat-test:boson-x-chain": "truffle test ./test/test-local/boson-x-chain/*  --network local",
-    "hardhat-test:boson": "truffle test ./test/test-local/boson/*  --network local"
+    "migrate:polygon_mumbai": "truffle migrate --reset --network polygon_mumbai"
   },
   "author": "masaun",
   "license": "MIT",
