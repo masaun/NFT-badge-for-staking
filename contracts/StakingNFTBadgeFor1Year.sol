@@ -10,12 +10,12 @@ contract StakingNFTBadgeFor1Year is ERC721 {
 
     constructor() public ERC721("Synthetix Staking NFT Badge for 1 year", "SSNB-1Y") {}
 
-    function mintBadge(address to, string memory tokenURI) public returns (uint256) {
+    function mintBadge(address to) public returns (uint256) {
         _tokenIds.increment();
 
         uint256 newBadgeId = _tokenIds.current();
         _mint(to, newBadgeId);
-        _setTokenURI(newBadgeId, tokenURI);
+        //_setTokenURI(newBadgeId, tokenURI);
 
         return newBadgeId;
     }

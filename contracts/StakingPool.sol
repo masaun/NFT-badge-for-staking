@@ -18,7 +18,7 @@ contract StakingPool {
 
     function unstake(uint unstakeAmount) public returns (bool) {
         // Staked-token (LP tokens) is transferred from msg.sender to this contract
-        lpToken.transferFrom(msg.sender, address(this), unstakeAmount);
+        lpToken.transfer(msg.sender, unstakeAmount);
     }
 
 }

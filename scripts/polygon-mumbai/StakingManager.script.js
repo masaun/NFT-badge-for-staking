@@ -1,5 +1,4 @@
 require('dotenv').config()
-//const Tx = require('ethereumjs-tx').Transaction
 
 /// Web3 instance
 const Web3 = require('web3')
@@ -78,16 +77,19 @@ async function main() {
     console.log("\n------------- Receive each tokens from Fancet -------------")
     await receiveTokensFromFancet()
 
-    console.log("\n------------- Check status before workflow is started -------------")
+    console.log("\n------------- Check status before staking -------------")
     await checkStatusBefore()
 
-    console.log("\n------------- Workflow of the StakingManager contract -------------")
+    console.log("\n------------- stake()  -------------")
     await stakeFor3Months()
     await stakeFor6Months()
     await stakeFor1Year()
 
-    console.log("\n------------- Check status after a user staked -------------")
+    console.log("\n------------- Check status after staking -------------")
     await checkStatusAfterStake()
+
+    console.log("\n------------- unstake()  -------------")
+    await unstake()
 }
 
 
@@ -185,31 +187,28 @@ async function checkStatusBefore() {
 /// Methods for workflow
 ///--------------------------------------------
 async function stakeFor3Months() {
-    const tokenURI = "https://ipfs.fleek.co/ipfs/QmdSMxjdETpEEDgG1zABTUQjDr3LUi8KXi3ycWUgcmcPRZ"
     const stakeAmount = toWei('0.1')
 
     let txReceipt1 = await lpToken.approve(STAKING_MANAGER, stakeAmount, { from: user })
-    let txReceipt2 = await stakingManager.stakeFor3Months(tokenURI, stakeAmount, { from: user })
+    let txReceipt2 = await stakingManager.stakeFor3Months(stakeAmount, { from: user })
 
     console.log("User should receive a NFT that represent staking for 3 months")
 }
 
 async function stakeFor6Months() {
-    const tokenURI = "https://ipfs.fleek.co/ipfs/QmdSMxjdETpEEDgG1zABTUQjDr3LUi8KXi3ycWUgcmcPRZ"
     const stakeAmount = toWei('0.1')
 
     let txReceipt1 = await lpToken.approve(STAKING_MANAGER, stakeAmount, { from: user })
-    let txReceipt2 = await stakingManager.stakeFor6Months(tokenURI, stakeAmount, { from: user })
+    let txReceipt2 = await stakingManager.stakeFor6Months(stakeAmount, { from: user })
 
     console.log("User should receive a NFT that represent staking for 6 months")
 }
 
 async function stakeFor1Year() {
-    const tokenURI = "https://ipfs.fleek.co/ipfs/QmdSMxjdETpEEDgG1zABTUQjDr3LUi8KXi3ycWUgcmcPRZ"
     const stakeAmount = toWei('0.1')
 
     let txReceipt1 = await lpToken.approve(STAKING_MANAGER, stakeAmount, { from: user })
-    let txReceipt2 = await stakingManager.stakeFor1Year(tokenURI, stakeAmount, { from: user })
+    let txReceipt2 = await stakingManager.stakeFor1Year(stakeAmount, { from: user })
 
     console.log("User should receive a NFT that represent staking for 1 year")    
 }
@@ -229,7 +228,10 @@ async function checkStatusAfterStake() {
     console.log('=== Owner of NFT badge for 1 year ===', owner3)
 }
 
-
+async function unstake() {
+    const unstakeAmount = toWei('0.1')
+    let txReceipt = await stakingManager.unstake(unstakeAmount, { from: user })
+}
 
 
 
