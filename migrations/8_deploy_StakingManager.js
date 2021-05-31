@@ -1,5 +1,4 @@
 const StakingManager = artifacts.require("StakingManager")
-
 const LPToken = artifacts.require("LPToken")
 const RewardToken = artifacts.require("RewardToken")
 const StakingPool = artifacts.require("StakingPool")

@@ -2,10 +2,10 @@ module.exports = {
     "Mainnet": {
     },
     "Polygon Mumbai": {
-        "FundLimitsOracle": "0xDC952b982eA0A0587576A5724DEEBA0caA46386E",
-        "ERC1155ERC721": "0xf548A51637e4f15a63C31c08F279A45Ef0B27610",
-        "VoucherKernel": "0x28932B5560A3EB75F9fd8dcA206e6399053dBA6B",
-        "Cashier": "0x76B85Dee71f741fdE297942ecb8770A439898f88",
-        "BosonRouter": "0x5b1d7bA3aad86B7281E7DBf476f1748b5304e9e7"
+        "StakingNFTBadgeFor3Months": "0x14C722A813C359332d1d9D9E5F897a89b6d11B45",
+        "StakingNFTBadgeFor6Months": "0xC5A64A6aA464DadC3F6c1274286A8B5cfc5b8116",
+        "StakingNFTBadgeFor1Year": "0x94d739D0557054e352d8066f0774b6dFfaE9Dcf0",
+        "StakingPool": "0xf480a61ceF7858a494beCd48573BEEAa21fae408",
+        "StakingManager": "0x4C689944E46a302D0E0423088817510cf39e0713"
     }
 }
