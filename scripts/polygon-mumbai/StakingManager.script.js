@@ -195,6 +195,21 @@ async function stakeFor1Year() {
     console.log("User should receive a NFT that represent staking for 1 year")    
 }
 
+async function checkStatusAfterStake() {
+    LPTokenBalance = await lpToken.balanceOf(deployer)
+    RewardTokenBalance = await rewardToken.balanceOf(deployer)
+    console.log('=== LP Token balance of deployer ===', fromWei(LPTokenBalance))
+    console.log('=== Reward Token balance of deployer ===', fromWei(RewardTokenBalance))
+
+    const tokenId = 1
+    const owner1 = await badgeFor3Months.ownerOf(tokenId)
+    const owner2 = await badgeFor6Months.ownerOf(tokenId)
+    const owner3 = await badgeFor1Year.ownerOf(tokenId)
+    console.log('=== Owner of NFT badge for 3 months ===', owner1)
+    console.log('=== Owner of NFT badge for 6 months ===', owner2)
+    console.log('=== Owner of NFT badge for 1 year ===', owner3)
+}
+
 
 
 
