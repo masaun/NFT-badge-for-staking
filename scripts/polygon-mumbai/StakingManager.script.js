@@ -72,7 +72,10 @@ async function main() {
     await setWalletAddress()
 
     console.log("\n------------- Setup smart contracts on Polygon mumbai testnet -------------")
-    await SetupSmartContracts()
+    await setupSmartContracts()
+
+    console.log("\n------------- Receive each tokens from Fancet -------------")
+    await receiveTokensFromFancet()
 
     console.log("\n------------- Check status before workflow is started -------------")
     await checkStatusBefore()
@@ -96,7 +99,7 @@ async function setWalletAddress() {
     console.log('=== deployer ===', deployer)
 }
 
-async function SetupSmartContracts() {
+async function setupSmartContracts() {
     //console.log("Deploy the LP Token contract instance + A deployer receive 1000000 LP Tokens as initial supply")
     console.log("Create the LP Token (mock) contract instance")
     //lpToken = await LPToken.new({ from: deployer })
@@ -160,6 +163,12 @@ async function SetupSmartContracts() {
     console.log('=== STAKING_POOL ===', STAKING_POOL)
     console.log('=== STAKING_MANAGER ===', STAKING_MANAGER)
     console.log('=== FANCET ===', FANCET)
+}
+
+async function receiveTokensFromFancet() {
+    console.log("User should receive 1000 LPTokens and 1000 RewardTokens")
+    txReceipt1 = await fancet.transferLPToken({ from: deployer })
+    txReceipt2 = await fancet.transferRewardToken({ from: deployer })
 }
 
 async function checkStatusBefore() {
