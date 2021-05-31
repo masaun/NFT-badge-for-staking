@@ -80,7 +80,7 @@ async function main() {
     console.log("\n------------- Check status before staking -------------")
     await checkStatusBefore()
 
-    console.log("\n------------- stake()  -------------")
+    console.log("\n------------- Stake LP tokens  -------------")
     await stakeFor3Months()
     await stakeFor6Months()
     await stakeFor1Year()
@@ -88,7 +88,7 @@ async function main() {
     console.log("\n------------- Check status after staking -------------")
     await checkStatusAfterStake()
 
-    console.log("\n------------- unstake()  -------------")
+    console.log("\n------------- unstake LP tokens and receive Reward tokens -------------")
     await unstakeLPs()
 }
 
