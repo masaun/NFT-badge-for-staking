@@ -179,7 +179,7 @@ async function checkStatusBefore() {
     LPTokenBalance = await lpToken.balanceOf(user)
     RewardTokenBalance = await rewardToken.balanceOf(user)
     console.log('=== LP Token balance of user ===', fromWei(LPTokenBalance))
-    console.log('=== Reward Token balance of user ===', fromWei(RewardTokenBalance))
+    //console.log('=== Reward Token balance of user ===', fromWei(RewardTokenBalance))
 }
 
 
@@ -220,7 +220,7 @@ async function checkStatusAfterStake() {
     LPTokenBalance = await lpToken.balanceOf(user)
     RewardTokenBalance = await rewardToken.balanceOf(user)
     console.log('=== LP Token balance of user ===', fromWei(LPTokenBalance))
-    console.log('=== Reward Token balance of user ===', fromWei(RewardTokenBalance))
+    //console.log('=== Reward Token balance of user ===', fromWei(RewardTokenBalance))
 
     const tokenId1 = await badgeFor3Months.getCurrentTokenId()
     const tokenId2 = await badgeFor6Months.getCurrentTokenId()
